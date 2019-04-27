@@ -1,5 +1,6 @@
-/vendor
 /.idea
 /.vscode
 /.vagrant
+/vendor
 .env
+composer.phar
