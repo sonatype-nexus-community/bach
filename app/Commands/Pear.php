@@ -12,14 +12,14 @@ class Pear extends Command
      *
      * @var string
      */
-    protected $signature = 'command:name';
+    protected $signature = 'pear';
 
     /**
      * The description of the command.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Audit PEAR dependencies';
 
     /**
      * Execute the console command.
