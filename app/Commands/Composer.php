@@ -28,7 +28,7 @@ class Composer extends Command
      */
     public function handle()
     {
-        //$this->info('Operation executed');
+        $this->info('Simplicity is the ultimate sophistication.');
         
     }
 
