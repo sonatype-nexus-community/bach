@@ -13,7 +13,6 @@ class ComposerCommandTest extends TestCase
      */
     public function testComposerCommand()
     {
-        $v = $this->artisan('composer')->expectsOutput('Simplicity is the ultimate sophistication.');
-             
+        $v = $this->artisan('composer')->expectsOutput('Simplicity is the ultimate sophistication.');        
     }
 }

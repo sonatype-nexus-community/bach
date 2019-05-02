@@ -4,6 +4,8 @@ namespace App\Commands;
 
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
+use Storage;
+use Illuminate\Support\Facades\File;
 
 class Composer extends Command
 {
@@ -12,7 +14,7 @@ class Composer extends Command
      *
      * @var string
      */
-    protected $signature = 'composer {file=composer.json}';
+    protected $signature = 'composer {file=composer.json}:The composer package manifest to audit.';
 
     /**
      * The description of the command.
@@ -28,8 +30,14 @@ class Composer extends Command
      */
     public function handle()
     {
-        $this->info('Simplicity is the ultimate sophistication.');
-        
+        if (File::exists($this->argument('file')))
+        {
+            $this->info("File exists.");
+        }
+        else
+        {
+            $this->error('The file does not exist.');
+        }
     }
 
     /**
