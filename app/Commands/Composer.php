@@ -1,14 +1,18 @@
 <?php
-
 namespace App\Commands;
+
+require 'vendor\autoload.php';
 
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 use Storage;
 use Illuminate\Support\Facades\File;
 
+use \Nadar\PhpComposerReader;
+
 class Composer extends Command
 {
+    protected $file;
     /**
      * The signature of the command.
      *
@@ -30,13 +34,14 @@ class Composer extends Command
      */
     public function handle()
     {
-        if (File::exists($this->argument('file')))
+        if (!File::exists($this->argument('file')))
         {
-            $this->info("File exists.");
+            $this->error("The file " . $this->argument('file') . " does not exist");
         }
         else
         {
-            $this->error('The file does not exist.');
+            $this->file = $this->argument('file');
+            $r = new PhpComposerReader\ComposerReader($this->file);
         }
     }
 
@@ -49,5 +54,10 @@ class Composer extends Command
     public function schedule(Schedule $schedule): void
     {
         // $schedule->command(static::class)->everyMinute();
+    }
+
+    protected function get_packages()
+    {
+
     }
 }
