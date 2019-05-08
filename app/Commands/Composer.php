@@ -6,10 +6,12 @@ require 'vendor\autoload.php';
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 use Illuminate\Support\Facades\File;
-
 use LaravelZero\Framework\Components\Logo\FigletString as ZendLogo;
+
 use \Nadar\PhpComposerReader;
 use PHLAK\SemVer;
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 
 class Composer extends Command
 {
@@ -23,9 +25,11 @@ class Composer extends Command
      */
     protected $packages = [];
 
-    protected $range_prefix_tokens = array('>', '<', '=', '^', '~');
-    
-    protected $range_suffix_tokens = array('*');
+    protected $packages_versions = [];
+
+    protected $coordinates = array("coordinates" => []);
+
+    protected $vulnerabilities = [];
 
     /**
      * The signature of the command.
@@ -69,10 +73,10 @@ class Composer extends Command
             $this->error("No packages found to audit.");
             return;
         }
-        foreach($this->packages as $package=>$constraint) 
-        {
-            $this->info($package . ' ' .$constraint . ' (' .$this->get_versions($constraint). ')');
-        }        
+        $this->get_packages_versions();
+        $this->get_coordinates();
+        $this->get_vulns();
+        $this->info(count($this->vulnerabilities));
     }
 
     protected function show_logo()
@@ -89,16 +93,18 @@ class Composer extends Command
         }
     }
 
-    protected function get_versions($constraint)
+    protected function get_version($constraint)
     {
+        $range_prefix_tokens = array('>', '<', '=', '^', '~');
+        
         $length = strlen($constraint);
         $start = 0;
         $end = $length - 1;
-        if (!in_array($constraint[$start], $this->range_prefix_tokens) && is_numeric($constraint[$start]) && $constraint[$end] != '*')
+        if (!in_array($constraint[$start], $range_prefix_tokens) && is_numeric($constraint[$start]) && $constraint[$end] != '*')
         {
             return new SemVer\Version($constraint);
         }
-        elseif (in_array($constraint[$start], $this->range_prefix_tokens) && !in_array($constraint[$start + 1], $this->range_prefix_tokens) 
+        elseif (in_array($constraint[$start], $range_prefix_tokens) && !in_array($constraint[$start + 1], $range_prefix_tokens) 
             && is_numeric($constraint[$start + 1]) && $constraint[$end] != '*')
         {
             $v = new SemVer\Version(substr($constraint, 1, $length - 1));
@@ -117,7 +123,7 @@ class Composer extends Command
                     return $v;
             }
         }
-        elseif (in_array($constraint[$start], $this->range_prefix_tokens) && in_array($constraint[$start + 1], $this->range_prefix_tokens) 
+        elseif (in_array($constraint[$start], $range_prefix_tokens) && in_array($constraint[$start + 1], $range_prefix_tokens) 
             && $constraint[end] != '*')
         {
             $v = new SemVer\Version($substr($constraint,2, $length - 2));
@@ -132,7 +138,7 @@ class Composer extends Command
 
             }
         }
-        else if (!in_array($constraint[$start], $this->range_prefix_tokens) && is_numeric($constraint[$start]) && $constraint[$end] == '*')
+        else if (!in_array($constraint[$start], $range_prefix_tokens) && is_numeric($constraint[$start]) && $constraint[$end] == '*')
         {
             return new SemVer\Version(str_replace('*', 0, $constraint));
         }
@@ -140,6 +146,60 @@ class Composer extends Command
         {
             $this->warn("Could not determine version operator.");
             return $constraint;
+        }
+    }
+
+    protected function get_packages_versions()
+    {
+        foreach($this->packages as $package=>$constraint) 
+        {
+            $v = $this->get_version($constraint);
+            $this->info($package . ' ' .$constraint . ' (' .$v. ')');
+            $this->packages_versions[$package] = $v;
+        }        
+    }
+
+    protected function get_coordinates()
+    {
+        $pkgs = [];
+        foreach($this->packages_versions as $package=>$version) 
+        {
+            array_push($this->coordinates["coordinates"], "pkg:composer/" . $package . "@".$version);
+        }
+        
+    }
+
+    protected function get_vulns()
+    {
+        $client = new Client([
+            // Base URI is used with relative requests
+            'base_uri' => 'https://ossindex.sonatype.org/api/',
+            // You can set any number of default request options.
+            'timeout'  => 100.0,
+        ]);
+        
+        try
+        {
+            $response = $client->post('v3/component-report', [
+                RequestOptions::JSON => $this->coordinates
+            ]);
+            $code = $response->getStatusCode();
+            if ($code != 200)
+            {
+                $this->error("HTTP request did not return 200 OK: ".$code . ".");
+                return;
+    
+            }
+            else
+            {
+                $this->vulnerabilities = \json_decode($response->getBody(), true);
+                return;
+            }    
+        }
+        catch (Exception $e)
+        {
+            $this->error("Exception thrown making HTTP request: ".$e->getMessage() . ".");
+            return;
         }
     }
 }
