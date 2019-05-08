@@ -1,7 +1,7 @@
 <?php
 namespace App\Commands;
 
-require 'vendor\autoload.php';
+require 'vendor/autoload.php';
 
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
@@ -76,7 +76,43 @@ class Composer extends Command
         $this->get_packages_versions();
         $this->get_coordinates();
         $this->get_vulns();
-        $this->info(count($this->vulnerabilities));
+        if(count($this->vulnerabilities) == 0)
+        {
+            $this->error("Did not receieve any data from OSS Index API.");
+            return;
+        }
+        else
+        {
+            $this->info("");
+            $this->info("Audit results:");
+            $this->info("==============");
+            foreach($this->vulnerabilities as $v)
+            {
+                if (!array_key_exists("coordinates", $v))
+                {
+                    continue;
+                }
+                $p = "PACKAGE: " . str_replace("pkg:composer/", "", $v['coordinates']);
+                $d = array_key_exists("description", $v) ? "DESC: " . $v['description'] : "";
+                $is_vulnerable = array_key_exists("vulnerabilities", $v) ? (count($v['vulnerabilities']) > 0 ? true: false) : false;
+                $is_vulnerable_text = "VULN: " . ($is_vulnerable ? "Yes" : "No");
+                $this->info($p . " " . $d . " " . $is_vulnerable_text);
+                if ($is_vulnerable)
+                {
+                    foreach($v["vulnerabilities"] as $vuln)
+                    {
+                        foreach($vuln as $key => $value)
+                        {
+                            $this->info("  " . $key . ":".$value);
+                        }
+                    }
+                }
+
+                //$this->info("vulnerable: " . count($v['vulnerabilities']) > 0);
+                ////$this->info(\str_replace("pkg:composer/", "", 
+                //$v->coordinates) . \property_exists($v, "description") ? $v->description : ""."  " . " vulnerable: " . count($v->vulnerabilities) > 0);
+            }
+        }
     }
 
     protected function show_logo()
@@ -102,12 +138,12 @@ class Composer extends Command
         $end = $length - 1;
         if (!in_array($constraint[$start], $range_prefix_tokens) && is_numeric($constraint[$start]) && $constraint[$end] != '*')
         {
-            return new SemVer\Version($constraint);
+            return new SemVer\Version2($constraint);
         }
         elseif (in_array($constraint[$start], $range_prefix_tokens) && !in_array($constraint[$start + 1], $range_prefix_tokens) 
             && is_numeric($constraint[$start + 1]) && $constraint[$end] != '*')
         {
-            $v = new SemVer\Version(substr($constraint, 1, $length - 1));
+            $v = new SemVer\Version2(substr($constraint, 1, $length - 1));
             switch($constraint[$start])
             {
                 case '=':
@@ -126,7 +162,7 @@ class Composer extends Command
         elseif (in_array($constraint[$start], $range_prefix_tokens) && in_array($constraint[$start + 1], $range_prefix_tokens) 
             && $constraint[end] != '*')
         {
-            $v = new SemVer\Version($substr($constraint,2, $length - 2));
+            $v = new SemVer\Version2($substr($constraint,2, $length - 2));
             switch($constraint[$start].$constraint[$start + 1])
             {
                 case '>=':
@@ -140,7 +176,7 @@ class Composer extends Command
         }
         else if (!in_array($constraint[$start], $range_prefix_tokens) && is_numeric($constraint[$start]) && $constraint[$end] == '*')
         {
-            return new SemVer\Version(str_replace('*', 0, $constraint));
+            return new SemVer\Version2(str_replace('*', 0, $constraint));
         }
         else
         {
