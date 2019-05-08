@@ -11,7 +11,6 @@ use LaravelZero\Framework\Components\Logo\FigletString as ZendLogo;
 use \Nadar\PhpComposerReader;
 use PHLAK\SemVer;
 
-
 class Composer extends Command
 {
     /**
@@ -64,15 +63,15 @@ class Composer extends Command
         }
                     
         $this->get_packages($reader);
-        $this->info("Parsed " . \count($this->packages) . " packages from " . $this->file . ".");
+        $this->info("Parsed " . \count($this->packages) . " packages from " . $this->file . ":");
         if (count($this->packages) == 0)
         {
             $this->error("No packages found to audit.");
             return;
         }
-        foreach($this->packages as $constraint) 
+        foreach($this->packages as $package=>$constraint) 
         {
-            $this->info($constraint . ' ' .$this->get_versions($constraint));
+            $this->info($package . ' ' .$constraint . ' (' .$this->get_versions($constraint). ')');
         }        
     }
 
@@ -108,13 +107,14 @@ class Composer extends Command
                 case '=':
                     return $v;
                 case '<':
+                    return $v->decrement();
                 case '>':
                 case '^':
                 case '~':
                     return $v->incrementMinor();
                 default:
-                    $this->warn("Could not determine version operator.");
-                    return $v->incrementMinor();
+                    $this->warn("Did not determine version operator for constraint ". $constraint . ".");
+                    return $v;
             }
         }
         elseif (in_array($constraint[$start], $this->range_prefix_tokens) && in_array($constraint[$start + 1], $this->range_prefix_tokens) 
@@ -125,10 +125,10 @@ class Composer extends Command
             {
                 case '>=':
                 case '<=':
-                    return $v->incrementMinor();
+                    return $v;
                 default:
-                    $this->warn("Could not determine version operator.");
-                    return $v->incrementMinor();
+                    $this->warn("Did not determine version operator for constraint ". $constraint . ".");
+                    return $v;
 
             }
         }
@@ -142,25 +142,4 @@ class Composer extends Command
             return $constraint;
         }
     }
-
-    protected function increment(SemVer\Version $version)
-    {
-
-    }
-
-
-
-
-   /**
-     * Define the command's schedule.
-     *
-     * @param  \Illuminate\Console\Scheduling\Schedule $schedule
-     * @return void
-     
-    public function schedule(Schedule $schedule): void
-    {
-        // $schedule->command(static::class)->everyMinute();
-    }
-    */
-
 }
