@@ -1,15 +1,13 @@
 <?php
 namespace App\Commands;
 
-require 'vendor/autoload.php';
-
-use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 use Illuminate\Support\Facades\File;
 use LaravelZero\Framework\Components\Logo\FigletString as ZendLogo;
-
-use \Nadar\PhpComposerReader;
-use PHLAK\SemVer;
+use \Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use \Nadar\PhpComposerReader\ComposerReader;
+use \Nadar\PhpComposerReader\RequireSection;
+use PHLAK\SemVer\Version2;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 
@@ -31,19 +29,30 @@ class Composer extends Command
 
     protected $vulnerabilities = [];
 
+    protected $styles = [];
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->styles = array
+        (
+            'red' => new OutputFormatterStyle('red', null, ['bold']) //white text on red background
+        );
+    }
+
     /**
      * The signature of the command.
      *
      * @var string
      */
-    protected $signature = 'composer {file=composer.json}:The composer package manifest to audit.';
+    protected $signature = 'composer {file}:The composer package manifest to audit.';
 
     /**
      * The description of the command.
      *
      * @var string
      */
-    protected $description = 'Audit Composer dependencies ';
+    protected $description = 'Audit Composer dependencies. Enter the path to composer.json after the command.';
 
     /**
      * Execute the console command.
@@ -52,6 +61,10 @@ class Composer extends Command
      */
     public function handle()
     {
+        foreach($this->styles as $key => $value)
+        {
+            $this->output->getFormatter()->setStyle($key, $value);
+        }
         $this->show_logo();
         if (!File::exists($this->argument('file')))
         {
@@ -60,7 +73,7 @@ class Composer extends Command
         }
     
         $this->file = realpath($this->argument('file'));
-        $reader = new PhpComposerReader\ComposerReader($this->file);
+        $reader = new ComposerReader($this->file);
         if (!$reader->canRead()) {
             $this->error("Could not read composer file " . $this->argument('file') ."." );
             return;
@@ -106,11 +119,7 @@ class Composer extends Command
                             $this->info("  " . $key . ":".$value);
                         }
                     }
-                }
-
-                //$this->info("vulnerable: " . count($v['vulnerabilities']) > 0);
-                ////$this->info(\str_replace("pkg:composer/", "", 
-                //$v->coordinates) . \property_exists($v, "description") ? $v->description : ""."  " . " vulnerable: " . count($v->vulnerabilities) > 0);
+                }                
             }
         }
     }
@@ -123,7 +132,7 @@ class Composer extends Command
 
     protected function get_packages($reader)
     {
-        $section = new PhpComposerReader\RequireSection($reader);
+        $section = new RequireSection($reader);
         foreach($section as $package) {
             $this->packages[$package->name] = $package->constraint;
         }
@@ -138,12 +147,12 @@ class Composer extends Command
         $end = $length - 1;
         if (!in_array($constraint[$start], $range_prefix_tokens) && is_numeric($constraint[$start]) && $constraint[$end] != '*')
         {
-            return new SemVer\Version2($constraint);
+            return new Version2($constraint);
         }
         elseif (in_array($constraint[$start], $range_prefix_tokens) && !in_array($constraint[$start + 1], $range_prefix_tokens) 
             && is_numeric($constraint[$start + 1]) && $constraint[$end] != '*')
         {
-            $v = new SemVer\Version2(substr($constraint, 1, $length - 1));
+            $v = new Version2(substr($constraint, 1, $length - 1));
             switch($constraint[$start])
             {
                 case '=':
@@ -162,7 +171,7 @@ class Composer extends Command
         elseif (in_array($constraint[$start], $range_prefix_tokens) && in_array($constraint[$start + 1], $range_prefix_tokens) 
             && $constraint[end] != '*')
         {
-            $v = new SemVer\Version2($substr($constraint,2, $length - 2));
+            $v = new Version2($substr($constraint,2, $length - 2));
             switch($constraint[$start].$constraint[$start + 1])
             {
                 case '>=':
@@ -176,7 +185,7 @@ class Composer extends Command
         }
         else if (!in_array($constraint[$start], $range_prefix_tokens) && is_numeric($constraint[$start]) && $constraint[$end] == '*')
         {
-            return new SemVer\Version2(str_replace('*', 0, $constraint));
+            return new Version2(str_replace('*', 0, $constraint));
         }
         else
         {
@@ -238,4 +247,12 @@ class Composer extends Command
             return;
         }
     }
+
+    protected function console_write($string, $style = null, $verbosity = null)
+    {
+        $styled = $style ? "<$style>$string</$style>" : $string;
+
+        $this->output->write($styled, false, $this->parseVerbosity($verbosity));
+    }
+
 }
