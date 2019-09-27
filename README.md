@@ -1,6 +1,15 @@
 # auditphp
 Dependency vulnerability auditor for PHP
 
+## Install
+
+```
+git clone https://github.com/OSSIndex/bach.git
+cd bach
+composer install
+```
+
+
 ## Help
 
 ```
@@ -33,13 +42,8 @@ Dependency vulnerability auditor for PHP
 
 ## Example usage
 
-git clone https://github.com/OSSIndex/bach.git
-cd bach
-composer install
-php auditphp composer composer.json
-
-Sample output:
 ```
+> php auditphp composer composer.json
                  _ _ _         _           
                 | (_) |       | |          
   __ _ _   _  __| |_| |_ _ __ | |__  _ __  
