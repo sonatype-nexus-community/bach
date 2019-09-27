@@ -1,4 +1,4 @@
-# auditphp
+# Bach
 Dependency vulnerability auditor for PHP
 
 ## Install
