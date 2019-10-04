@@ -1,0 +1,3 @@
+#!/bin/bash
+echo Installing PHP dependencies...
+composer install "$@"
