@@ -1,20 +1,13 @@
 {
-    "name": "laravel-zero/laravel-zero",
-    "description": "The Laravel Zero Framework.",
-    "keywords": ["framework", "laravel", "laravel zero", "console", "cli"],
-    "homepage": "https://laravel-zero.com",
+    "name": "ossindex/bach",
+    "description": "Dependency vulnerability auditor for PHP",
+    "homepage": "https://github.com/OSSIndex/bach",
     "type": "project",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "support": {
-        "issues": "https://github.com/laravel-zero/laravel-zero/issues",
-        "source": "https://github.com/laravel-zero/laravel-zero"
+        "issues": "https://github.com/OSSIndex/bach/issues",
+        "source": "https://github.com/OSSIndex/bach"
     },
-    "authors": [
-        {
-            "name": "Nuno Maduro",
-            "email": "enunomaduro@gmail.com"
-        }
-    ],
     "require": {
         "php": "^7.1.3",
         "eloquent/composer-config-reader": "^2.1",
