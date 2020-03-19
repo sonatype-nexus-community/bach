@@ -4,16 +4,15 @@ Dependency vulnerability auditor for PHP
 ## Install
 
 ```
-git clone https://github.com/OSSIndex/bach.git
+git clone https://github.com/sonatype-nexus-community/bach.git
 cd bach
 composer install
 ```
 
-
 ## Help
 
 ```
-> php auditphp
+> php bach
 
   
                    _ _ _         _           
@@ -27,7 +26,7 @@ composer install
 
   unreleased
 
-  USAGE: auditphp <command> [options] [arguments]
+  USAGE: bach <command> [options] [arguments]
 
   composer     Audit Composer dependencies. Enter the path to composer.json after the command.
   pear         Audit PEAR dependencies
@@ -43,7 +42,7 @@ composer install
 ## Example usage
 
 ```
-> php auditphp composer composer.json
+> php bach composer composer.json
                  _ _ _         _           
                 | (_) |       | |          
   __ _ _   _  __| |_| |_ _ __ | |__  _ __  
