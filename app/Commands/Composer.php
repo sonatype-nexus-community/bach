@@ -28,16 +28,17 @@ class Composer extends Command
 
     protected $coordinates = array("coordinates" => []);
 
+    protected $cache;
+
     protected $cached_vulnerabilities = array();
 
     protected $vulnerabilities = [];
 
+    protected $user_name;
+
+    protected $password;
+
     protected $styles = [];
-
-    protected $cache;
-
-    protected $cached = [];
-
     /**
      * Return the user's home directory.
      */
@@ -77,7 +78,9 @@ class Composer extends Command
      *
      * @var string
      */
-    protected $signature = 'composer {file}:The composer package manifest to audit.';
+    protected $signature = 'composer {file}:the composer package manifest to audit.
+                                {user=}:the OSS Index user for authentication.
+                                {pass=}:the OSS Index password for authentication.}';
 
     /**
      * The description of the command.
@@ -149,8 +152,9 @@ class Composer extends Command
             $this->comment("");
             $this->comment("Audit results:");
             $this->info("==============");
-            foreach($this->vulnerabilities as $v)
+            foreach($this->vulnerabilities as $ov)
             {
+                $v = (array) $ov;
                 if (!array_key_exists("coordinates", $v))
                 {
                     continue;
@@ -346,6 +350,10 @@ class Composer extends Command
         $c = count($this->cached_vulnerabilities);
         $this->vulnerabilities = $this->cached_vulnerabilities;
         $this->info("Vulnerability data for $c packages is cached.");
+        if (count($this->coordinates["coordinates"]) == 0)
+        {
+            return;
+        }
         $client = new Client([
             // Base URI is used with relative requests
             'base_uri' => 'https://ossindex.sonatype.org/api/',
