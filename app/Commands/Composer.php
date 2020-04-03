@@ -10,6 +10,7 @@ use \Nadar\PhpComposerReader\RequireSection;
 use PHLAK\SemVer\Version2;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use Kodus\Cache\FileCache;
 
 class Composer extends Command
 {
@@ -27,9 +28,40 @@ class Composer extends Command
 
     protected $coordinates = array("coordinates" => []);
 
+    protected $cached_vulnerabilities = array();
+
     protected $vulnerabilities = [];
 
     protected $styles = [];
+
+    protected $cache;
+
+    protected $cached = [];
+
+    /**
+     * Return the user's home directory.
+     */
+    protected function get_home() {
+        // Cannot use $_SERVER superglobal since that's empty during UnitUnishTestCase
+        // getenv('HOME') isn't set on Windows and generates a Notice.
+        $home = getenv('HOME');
+        if (!empty($home)) {
+        // home should never end with a trailing slash.
+        $home = rtrim($home, '/');
+        }
+        elseif (!empty($_SERVER['HOMEDRIVE']) && !empty($_SERVER['HOMEPATH'])) {
+        // home on windows
+        $home = $_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'];
+        // If HOMEPATH is a root directory the path can end with a slash. Make sure
+        // that doesn't happen.
+        $home = rtrim($home, '\\/');
+        }
+        return empty($home) ? NULL : $home;
+    }
+
+    const CACHE_DEFAULT_EXPIRATION = 86400;
+    const CACHE_DIR_MODE = 0775;
+    const CACHE_FILE_MODE = 0664;
 
     public function __construct()
     {
@@ -73,7 +105,13 @@ class Composer extends Command
             $this->error("The file " . $this->argument('file') . " does not exist");
             return;
         }
-    
+
+        $cachePath = $this->get_home() . DIRECTORY_SEPARATOR . ".cache";
+        File::isDirectory($cachePath) or File::makeDirectory($cachePath, 0777, true, true);
+        $this->cache = new FileCache($cachePath, self::CACHE_DEFAULT_EXPIRATION, self::CACHE_DIR_MODE, self::CACHE_FILE_MODE);
+        $this->info("Cache directory is $cachePath.");
+        $this->cache->cleanExpired();
+        
         $this->file = realpath($this->argument('file'));
         $reader = new ComposerReader($this->file);
         if (!$reader->canRead()) {
@@ -289,15 +327,25 @@ class Composer extends Command
 
     protected function get_coordinates()
     {
-        $pkgs = [];
         foreach($this->packages_versions as $package=>$version) 
         {
-            array_push($this->coordinates["coordinates"], "pkg:composer/" . $package . "@".$version);
+            $key = \base64_encode("pkg:composer/" . $package . "@".$version);
+            if ($this->cache->has($key))
+            {
+                $this->cached_vulnerabilities += array("pkg:composer/" . $package . "@".$version => json_decode($this->cache->get($key)));
+            }
+            else 
+            {
+                array_push($this->coordinates["coordinates"], "pkg:composer/" . $package . "@".$version);
+            }
         }
     }
 
     protected function get_vulns()
     {
+        $c = count($this->cached_vulnerabilities);
+        $this->vulnerabilities = $this->cached_vulnerabilities;
+        $this->info("Vulnerability data for $c packages is cached.");
         $client = new Client([
             // Base URI is used with relative requests
             'base_uri' => 'https://ossindex.sonatype.org/api/',
@@ -319,7 +367,11 @@ class Composer extends Command
             }
             else
             {
-                $this->vulnerabilities = \json_decode($response->getBody(), true);
+                $r = json_decode($response->getBody(), true);
+                foreach ($r as $v) {
+                    $this->cache->set(\base64_encode($v['coordinates']), \json_encode($v));
+                }
+                $this->vulnerabilities += $r;
                 return;
             }    
         }

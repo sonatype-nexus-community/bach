@@ -24,6 +24,7 @@
         "laravel-zero/framework": "5.8.*",
         "nadar/php-composer-reader": "^1.2",
         "phlak/semver": "^2.0",
+        "kodus/file-cache": "^1.1.",
         "zendframework/zend-text": "^2.7"
     },
     "require-dev": {
