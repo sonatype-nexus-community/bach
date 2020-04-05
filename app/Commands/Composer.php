@@ -78,9 +78,9 @@ class Composer extends Command
      *
      * @var string
      */
-    protected $signature = 'composer {file}:the composer package manifest to audit.
-                                {user=}:the OSS Index user for authentication.
-                                {pass=}:the OSS Index password for authentication.}';
+    protected $signature = 'composer {file} 
+                            {--user= : (Optional) OSS Index user to authenticate with.} 
+                            {--pass= : (Optional) Password for OSS Index user to authenticate with.}';
 
     /**
      * The description of the command.
@@ -348,17 +348,28 @@ class Composer extends Command
     protected function get_vulns()
     {
         $c = count($this->cached_vulnerabilities);
+        $qc = count($this->coordinates["coordinates"]);
         $this->vulnerabilities = $this->cached_vulnerabilities;
         $this->info("Vulnerability data for $c packages is cached.");
         if (count($this->coordinates["coordinates"]) == 0)
         {
             return;
         }
+        $this->info("Querying OSS Index for $qc vulnerabilities...");
+        $auth = array();
+        if ($this->option('user') != "" && $this->option('pass') != "")
+        {
+            $u = $this->option('user');
+            $p = $this->option('pass');
+            $this->info("Using authentication for user $u.");
+            $auth = [$this->option('user'), $this->option('pass')];
+        }
         $client = new Client([
             // Base URI is used with relative requests
             'base_uri' => 'https://ossindex.sonatype.org/api/',
             // You can set any number of default request options.
             'timeout'  => 100.0,
+            'auth' => $auth
         ]);
         
         try
