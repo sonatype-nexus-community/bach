@@ -12,6 +12,7 @@ use PHLAK\SemVer\Version2;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Kodus\Cache\FileCache;
+use ComposerInternal\UUID;
 
 class Composer extends Command
 {
@@ -453,9 +454,8 @@ class Composer extends Command
             $this->error("Exception thrown making HTTP request: ".$e->getMessage() . ".");
             return;
         }
-
-        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<bom xmlns=\"http://cyclonedx.org/schema/bom/1.1\" version=\"1\" serialNumber=\"urn:uuid:d0a742e2-760d-47fb-a8e8-33bf37f6f105\">\n\t<components>\n";
-        $this->info($xml);
+        $uuid = \ComposerInternal\UUID::v4();
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<bom xmlns=\"http://cyclonedx.org/schema/bom/1.1\" version=\"1\" serialNumber=\"urn:uuid:$uuid\">\n\t<components>\n";
         foreach($this->vulnerabilities as $ov)
         {
             $v = (array) $ov;
@@ -465,29 +465,18 @@ class Composer extends Command
             }
             $purl = $v['coordinates'];
             $p = \explode("@", str_replace("pkg:composer/", "", $purl));
-            $name = $p[0];
+            $n = explode("/", $p[0]);
+            $name = count($n) == 2 ? $n[1] : $n[0];
+            $group = count($n) == 2 ? $n[0] : "";
             $version = $p[1];
             $xml .= "\t\t<component type =\"library\">\n";
+            $xml .= "\t\t\t<group>$group</group>\n";
             $xml .= "\t\t\t<name>$name</name>\n";
             $xml .= "\t\t\t<version>$version</version>\n";
             $xml .= "\t\t\t<purl>$purl</purl>\n";
             $xml .= "\t\t</component>\n";
         }
         $xml .= "\t<components>\n</bom>";
-        $this->info($xml);
-    
-        /*for pin in p.object!.pins!
-        {
-            xml += "        <component type =\"library\">\n"
-            xml += "            <name>\(pin.package!)</name>\n"
-            xml += "            <version>\(pin.state!.version!)</version>\n"
-            xml += "            <purl>pkg:swift/\(pin.package!)@\(pin.state!.version!)</purl>\n"
-            xml += "        </component>\n"
-        }
-        xml += "    </components>\n"
-        xml += "</bom>"
-        */
-
-        
+        $this->info("Software BOM:\n$xml", 'v');    
     }
 }
