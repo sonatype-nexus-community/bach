@@ -511,7 +511,7 @@ class Composer extends Command
                 ],
                 'body' => $xml,
             ];
-            $response = $client->post("/api/v2/scan/applications/$internal_appid/sources/bach?stageId=develop", $options);
+            $response = $client->post("/api/v2/scan/applications/$internal_appid/sources/bach", $options);
             $code = $response->getStatusCode();
             if ($code != 202)
             {
