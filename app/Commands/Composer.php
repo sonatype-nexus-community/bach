@@ -446,7 +446,6 @@ class Composer extends Command
                 }
                 $internal_appid = $apps[0]["id"];
                 $this->info("IQ Server internal app id is $internal_appid.", 'v');
-                return;
             }    
         }
         catch (Exception $e)
@@ -454,6 +453,41 @@ class Composer extends Command
             $this->error("Exception thrown making HTTP request: ".$e->getMessage() . ".");
             return;
         }
+
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<bom xmlns=\"http://cyclonedx.org/schema/bom/1.1\" version=\"1\" serialNumber=\"urn:uuid:d0a742e2-760d-47fb-a8e8-33bf37f6f105\">\n\t<components>\n";
+        $this->info($xml);
+        foreach($this->vulnerabilities as $ov)
+        {
+            $v = (array) $ov;
+            if (!array_key_exists("coordinates", $v))
+            {
+                continue;
+            }
+            $purl = $v['coordinates'];
+            $p = \explode("@", str_replace("pkg:composer/", "", $purl));
+            $name = $p[0];
+            $version = $p[1];
+            $xml .= "\t\t<component type =\"library\">\n";
+            $xml .= "\t\t\t<name>$name</name>\n";
+            $xml .= "\t\t\t<version>$version</version>\n";
+            $xml .= "\t\t\t<purl>$purl</purl>\n";
+            $xml .= "\t\t</component>\n";
+        }
+        $xml .= "\t<components>\n</bom>";
+        $this->info($xml);
+    
+        /*for pin in p.object!.pins!
+        {
+            xml += "        <component type =\"library\">\n"
+            xml += "            <name>\(pin.package!)</name>\n"
+            xml += "            <version>\(pin.state!.version!)</version>\n"
+            xml += "            <purl>pkg:swift/\(pin.package!)@\(pin.state!.version!)</purl>\n"
+            xml += "        </component>\n"
+        }
+        xml += "    </components>\n"
+        xml += "</bom>"
+        */
+
         
     }
 }
