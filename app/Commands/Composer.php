@@ -1,10 +1,11 @@
 <?php
 namespace App\Commands;
 
-use LaravelZero\Framework\Commands\Command;
 use Illuminate\Support\Facades\File;
-use LaravelZero\Framework\Components\Logo\FigletString as ZendLogo;
 use \Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use \Symfony\Component\Console\Helper\ProgressBar;
+use LaravelZero\Framework\Commands\Command;
+use LaravelZero\Framework\Components\Logo\FigletString as ZendLogo;
 use \Nadar\PhpComposerReader\ComposerReader;
 use \Nadar\PhpComposerReader\RequireSection;
 use PHLAK\SemVer\Version2;
@@ -38,7 +39,6 @@ class Composer extends Command
 
     protected $password;
 
-    protected $styles = [];
     /**
      * Return the user's home directory.
      */
@@ -67,10 +67,6 @@ class Composer extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->styles = array
-        (
-            // 'red' => new OutputFormatterStyle('red', null, ['bold']) //white text on red background
-        );
     }
 
     /**
@@ -79,6 +75,7 @@ class Composer extends Command
      * @var string
      */
     protected $signature = 'composer {file} 
+                            {--server= : (Optional) IQ Server URL to report components and vulnerabilities to.}
                             {--user= : (Optional) OSS Index user to authenticate with.} 
                             {--pass= : (Optional) Password for OSS Index user to authenticate with.}';
 
@@ -96,11 +93,6 @@ class Composer extends Command
      */
     public function handle()
     {
-        foreach($this->styles as $key => $value)
-        {
-            $this->output->getFormatter()->setStyle($key, $value);
-        }
-
         $this->show_logo();
         
         if (!File::exists($this->argument('file')))
@@ -108,7 +100,6 @@ class Composer extends Command
             $this->error("The file " . $this->argument('file') . " does not exist");
             return;
         }
-
         $cachePath = $this->get_home() . DIRECTORY_SEPARATOR . ".cache";
         File::isDirectory($cachePath) or File::makeDirectory($cachePath, 0777, true, true);
         $this->cache = new FileCache($cachePath, self::CACHE_DEFAULT_EXPIRATION, self::CACHE_DIR_MODE, self::CACHE_FILE_MODE);
@@ -122,7 +113,7 @@ class Composer extends Command
             return;
         }
         $this->get_packages($reader);
-        $this->comment("Parsed " . \count($this->packages) . " packages from " . $this->file . ":");
+        $this->info("Parsed " . \count($this->packages) . " packages from " . $this->file . ":");
         if (count($this->packages) == 0)
         {
             $this->warn("No packages found to audit.");
@@ -132,25 +123,25 @@ class Composer extends Command
         $this->lock_file = dirname($this->file). DIRECTORY_SEPARATOR . 'composer.lock';
         if (File::exists($this->lock_file))
         {
-            $this->comment("Composer lock file found at ".$this->lock_file). '.';
+            $this->info("Composer lock file found at ".$this->lock_file). '.';
             $this->get_lock_file_packages($this->lock_file);
         }
         else {
             $this->warn("Did not find composer lock file found at ".$this->lock_file). '.' . ' Transitive package dependencies will not be audited.';
         }            
-        $this->comment(count($this->packages) . " total packages to audit:");
+        $this->info(count($this->packages) . " total packages to audit.");
         $this->get_packages_versions();
         $this->get_coordinates();
         $this->get_vulns();
         if(count($this->vulnerabilities) == 0)
         {
-            $this->error("Did not receieve any data from OSS Index API.");
+            $this->error("Did not receieve any vulnerability data from OSS Index API.");
             return;
         }
         else
         {
-            $this->comment("");
-            $this->comment("Audit results:");
+            $this->info("");
+            $this->info("Audit results:");
             $this->info("==============");
             foreach($this->vulnerabilities as $ov)
             {
@@ -164,7 +155,7 @@ class Composer extends Command
                 $is_vulnerable = array_key_exists("vulnerabilities", $v) ? (count($v['vulnerabilities']) > 0 ? true: false) : false;
                 $is_vulnerable_text = "VULN: " . ($is_vulnerable ? "Yes" : "No");
                 if(!$is_vulnerable) {
-                    $this->info($p . " " . $d . " " . $is_vulnerable_text);
+                    $this->info($p . " " . $d . " " . $is_vulnerable_text, 'v');
                 }
                 else {
                     $this->error($p . " " . $d . " " . $is_vulnerable_text);
@@ -172,7 +163,7 @@ class Composer extends Command
                     {
                         foreach($vuln as $key => $value)
                         {
-                            $this->comment("  " . $key . ": ".$value);
+                            $this->info("  " . $key . ": ".$value);
                         }
                     }
                 }                
@@ -183,7 +174,7 @@ class Composer extends Command
     protected function show_logo()
     {
         $l = new ZendLogo('Bach', []);
-        echo $l;
+        $this->info($l);
     }
 
     protected function get_packages($reader)
@@ -243,11 +234,11 @@ class Composer extends Command
         $count = count($this->packages);
         if ($count > $orig_count)
         {
-            $this->comment("Added ".($count - $orig_count). " packages from Composer lock file at ".$lock_file.".");
+            $this->info("Added ".($count - $orig_count). " packages from Composer lock file at ".$lock_file.".");
         }
     }
 
-    protected function get_version($constraint)
+    protected function get_version($package, $constraint)
     {
         $range_prefix_tokens = array('>', '<', '=', '^', '~');
         
@@ -273,7 +264,7 @@ class Composer extends Command
                 case '~':
                     return $v->incrementMinor();
                 default:
-                    $this->warn("Did not determine version operator for constraint ". $constraint . ".");
+                    $this->warn("Could not determine version operator for $package constraint $constraint. Exact version match will be used.");
                     return $v;
             }
         }
@@ -287,7 +278,7 @@ class Composer extends Command
                 case '<=':
                     return $v;
                 default:
-                    $this->warn("Did not determine version operator for constraint ". $constraint . ".");
+                    $this->warn("Could not determine version operator for $package constraint $constraint. Exact version match will be used.");
                     return $v;
 
             }
@@ -298,7 +289,7 @@ class Composer extends Command
         }
         else
         {
-            $this->warn("Could not determine version operator for constraint ".$constraint.".");
+            $this->warn("Could not determine version operator for package $package constraint $constraint. Exact match will be used.");
             return $constraint;
         }
     }
@@ -320,11 +311,16 @@ class Composer extends Command
                 $c = '0.1';
             }
             try {
-                $v = $this->get_version($c);
-                $this->info($package . ' ' .$constraint . ' (' .$v. ')');
+                $v = $this->get_version($package, $c);
+                $this->info($package . ' ' .$constraint . ' (' .$v. ')', 'v');
                 $this->packages_versions[$package] = $v;
             } catch (\Throwable $th) {
-                $this->error("Error occurred determinig version for package ".$package . "(".$constraint.")". ": ".$th->getMessage().".");
+                if (strpos($c, 'dev-') === 0) {
+                    $this->warn("The constraint $c is a VCS branch. Only exact version matches are possible.");
+                }
+                else {
+                    $this->error("Error occurred determining version for package ".$package . " using constraint (".$c.")". ": ".$th->getMessage().".");
+                }
             }
         }        
     }
