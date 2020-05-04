@@ -332,12 +332,12 @@ class Composer extends Command
         }
         $this->info("Querying OSS Index for $qc vulnerabilities...");
         $auth = array();
-        if ($this->option('user') != "" && $this->option('pass') != "")
+        if ($this->option('ossuser') != "" && $this->option('osspass') != "")
         {
             $u = $this->option('ossuser');
             $p = $this->option('osspass');
             $this->info("Using authentication for user $u.");
-            $auth = [$this->option('user'), $this->option('pass')];
+            $auth = [$this->option('ossuser'), $this->option('osspass')];
         }
         $client = new Client([
             // Base URI is used with relative requests
@@ -488,7 +488,7 @@ class Composer extends Command
                         continue;
                     }
                     else {
-                        $vid = array_key_exists("cve", $vulnerability) ? $vulnerability->cve : $vulnerability -> cwe;
+                        $vid = array_key_exists("cve", $vulnerability) ? $vulnerability->cve : $vulnerability->cwe;
                         $xml .= "\t\t\t\t<v:vulnerability ref=\"$purl\">\n";
                         $xml .= "\t\t\t\t\t<v:id>$vid</v:id>\n";
                         $xml .= "\t\t\t\t</v:vulnerability>\n";
