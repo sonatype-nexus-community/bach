@@ -76,8 +76,11 @@ class Composer extends Command
      */
     protected $signature = 'composer {file} 
                             {--server= : (Optional) IQ Server URL to report components and vulnerabilities to.}
-                            {--user= : (Optional) OSS Index user to authenticate with.} 
-                            {--pass= : (Optional) Password for OSS Index user to authenticate with.}';
+                            {--appid= : (Optional) IQ Server application id. Default is the Composer file directory name.}
+                            {--iquser= : (Optional) IQ Server user to authenticate with.} 
+                            {--iqpass= : (Optional) IQ Serve password to authenticate with.}
+                            {--ossuser= : (Optional) OSS Index user to authenticate with.} 
+                            {--osspass= : (Optional) Password for OSS Index user to authenticate with.}';
 
     /**
      * The description of the command.
@@ -94,7 +97,6 @@ class Composer extends Command
     public function handle()
     {
         $this->show_logo();
-        
         if (!File::exists($this->argument('file')))
         {
             $this->error("The file " . $this->argument('file') . " does not exist");
@@ -140,34 +142,11 @@ class Composer extends Command
         }
         else
         {
-            $this->info("");
-            $this->info("Audit results:");
-            $this->info("==============");
-            foreach($this->vulnerabilities as $ov)
-            {
-                $v = (array) $ov;
-                if (!array_key_exists("coordinates", $v))
-                {
-                    continue;
-                }
-                $p = "PACKAGE: " . str_replace("pkg:composer/", "", $v['coordinates']);
-                $d = array_key_exists("description", $v) ? "DESC: " . $v['description'] : "";
-                $is_vulnerable = array_key_exists("vulnerabilities", $v) ? (count($v['vulnerabilities']) > 0 ? true: false) : false;
-                $is_vulnerable_text = "VULN: " . ($is_vulnerable ? "Yes" : "No");
-                if(!$is_vulnerable) {
-                    $this->info($p . " " . $d . " " . $is_vulnerable_text, 'v');
-                }
-                else {
-                    $this->error($p . " " . $d . " " . $is_vulnerable_text);
-                    foreach($v["vulnerabilities"] as $vuln)
-                    {
-                        foreach($vuln as $key => $value)
-                        {
-                            $this->info("  " . $key . ": ".$value);
-                        }
-                    }
-                }                
+            $this->print_results();
+            if ($this->option('server') != "" && $this->option('iquser') != "" && $this->option('iqpass') != "") {
+                $this->report_vulns();
             }
+            return;
         }
     }
 
@@ -175,6 +154,7 @@ class Composer extends Command
     {
         $l = new ZendLogo('Bach', []);
         $this->info($l);
+        $this->info(app('git.version'));
     }
 
     protected function get_packages($reader)
@@ -296,6 +276,7 @@ class Composer extends Command
 
     protected function get_packages_versions()
     {
+        $this->info("");
         foreach($this->packages as $package=>$constraint) 
         {
             $c = $constraint;
@@ -319,7 +300,7 @@ class Composer extends Command
                     $this->warn("The constraint $c is a VCS branch. Only exact version matches are possible.");
                 }
                 else {
-                    $this->error("Error occurred determining version for package ".$package . " using constraint (".$c.")". ": ".$th->getMessage().".");
+                    $this->error("Could not determine version for package ".$package . " using constraint (".$c.")". ": ".$th->getMessage().". Package will be skipped.");
                 }
             }
         }        
@@ -343,6 +324,7 @@ class Composer extends Command
 
     protected function get_vulns()
     {
+        $this->info("");
         $c = count($this->cached_vulnerabilities);
         $qc = count($this->coordinates["coordinates"]);
         $this->vulnerabilities = $this->cached_vulnerabilities;
@@ -355,8 +337,8 @@ class Composer extends Command
         $auth = array();
         if ($this->option('user') != "" && $this->option('pass') != "")
         {
-            $u = $this->option('user');
-            $p = $this->option('pass');
+            $u = $this->option('ossuser');
+            $p = $this->option('osspass');
             $this->info("Using authentication for user $u.");
             $auth = [$this->option('user'), $this->option('pass')];
         }
@@ -395,5 +377,81 @@ class Composer extends Command
             $this->error("Exception thrown making HTTP request: ".$e->getMessage() . ".");
             return;
         }
+    }
+
+    protected function print_results() {
+        $this->info("");
+        $this->info("Audit results:");
+        $this->info("==============");
+        foreach($this->vulnerabilities as $ov)
+        {
+            $v = (array) $ov;
+            if (!array_key_exists("coordinates", $v))
+            {
+                continue;
+            }
+            $p = "PACKAGE: " . str_replace("pkg:composer/", "", $v['coordinates']);
+            $d = array_key_exists("description", $v) ? "DESC: " . $v['description'] : "";
+            $is_vulnerable = array_key_exists("vulnerabilities", $v) ? (count($v['vulnerabilities']) > 0 ? true: false) : false;
+            $is_vulnerable_text = "VULN: " . ($is_vulnerable ? "Yes" : "No");
+            if(!$is_vulnerable) {
+                $this->info($p . " " . $d . " " . $is_vulnerable_text, 'v');
+            }
+            else {
+                $this->error($p . " " . $d . " " . $is_vulnerable_text);
+                foreach($v["vulnerabilities"] as $vuln)
+                {
+                    foreach($vuln as $key => $value)
+                    {
+                        $this->info("  " . $key . ": ".$value);
+                    }
+                }
+            }                
+        }
+    }
+
+    protected function report_vulns() {
+        $server =  $this->option('server');
+        $u =  $this->option('iquser');
+        $p =  $this->option('iquser');
+        $appid = $this->option('appid') ? $this->option('appid') : basename(dirname($this->file));
+        $this->info("Using IQ Server at $server with user $u for app id $appid.");
+        $auth = [$this->option('iquser'), $this->option('iqpass')];
+        $client = new Client([
+            // Base URI is used with relative requests
+            'base_uri' => $server,
+            // You can set any number of default request options.
+            'timeout'  => 100.0,
+            'auth' => $auth
+        ]);
+        /** 
+        try
+        {
+            $response = $client->post("/api/v2/applications?publicId=\(iqServerAppId!)", [
+                RequestOptions::JSON => $this->coordinates
+            ]);
+            $code = $response->getStatusCode();
+            if ($code != 200)
+            {
+                $this->error("HTTP request did not return 200 OK: ".$code . ".");
+                return;
+    
+            }
+            else
+            {
+                $r = json_decode($response->getBody(), true);
+                foreach ($r as $v) {
+                    $this->cache->set(\base64_encode($v['coordinates']), \json_encode($v));
+                }
+                $this->vulnerabilities += $r;
+                return;
+            }    
+        }
+        catch (Exception $e)
+        {
+            $this->error("Exception thrown making HTTP request: ".$e->getMessage() . ".");
+            return;
+        }
+        */
     }
 }
