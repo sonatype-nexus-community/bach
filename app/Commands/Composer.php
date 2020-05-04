@@ -35,10 +35,6 @@ class Composer extends Command
 
     protected $vulnerabilities = [];
 
-    protected $user_name;
-
-    protected $password;
-
     /**
      * Return the user's home directory.
      */
@@ -411,12 +407,14 @@ class Composer extends Command
     }
 
     protected function report_vulns() {
+        $this->info("");
         $server =  $this->option('server');
         $u =  $this->option('iquser');
         $p =  $this->option('iquser');
-        $appid = $this->option('appid') ? $this->option('appid') : basename(dirname($this->file));
-        $this->info("Using IQ Server at $server with user $u for app id $appid.");
+        $appid = $this->option('appid') ? $this->option('appid') : \basename(\dirname($this->file));
+        $this->info("Using IQ Server at $server with user $u for app id $appid...");
         $auth = [$this->option('iquser'), $this->option('iqpass')];
+        $internal_appid = "";
         $client = new Client([
             // Base URI is used with relative requests
             'base_uri' => $server,
@@ -424,12 +422,10 @@ class Composer extends Command
             'timeout'  => 100.0,
             'auth' => $auth
         ]);
-        /** 
+        
         try
         {
-            $response = $client->post("/api/v2/applications?publicId=\(iqServerAppId!)", [
-                RequestOptions::JSON => $this->coordinates
-            ]);
+            $response = $client->get("/api/v2/applications?publicId=$appid");
             $code = $response->getStatusCode();
             if ($code != 200)
             {
@@ -439,11 +435,17 @@ class Composer extends Command
             }
             else
             {
-                $r = json_decode($response->getBody(), true);
-                foreach ($r as $v) {
-                    $this->cache->set(\base64_encode($v['coordinates']), \json_encode($v));
+                $body = $response->getBody();
+                $r = json_decode($body, true);
+                $this->info("JSON response: $body", 'v');
+                $apps = $r["applications"];
+                if (count($apps) == 0)
+                {
+                    $this->error("Invalid IQ Server application id: $appid");
+                    return;
                 }
-                $this->vulnerabilities += $r;
+                $internal_appid = $apps[0]["id"];
+                $this->info("IQ Server internal app id is $internal_appid.", 'v');
                 return;
             }    
         }
@@ -452,6 +454,6 @@ class Composer extends Command
             $this->error("Exception thrown making HTTP request: ".$e->getMessage() . ".");
             return;
         }
-        */
+        
     }
 }
