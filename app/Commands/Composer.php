@@ -454,8 +454,11 @@ class Composer extends Command
             $this->error("Exception thrown making HTTP request: ".$e->getMessage() . ".");
             return;
         }
+        
         $uuid = \ComposerInternal\UUID::v4();
-        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<bom xmlns=\"http://cyclonedx.org/schema/bom/1.1\" version=\"1\" serialNumber=\"urn:uuid:$uuid\">\n\t<components>\n";
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<bom xmlns=\"http://cyclonedx.org/schema/bom/1.1\" version=\"1\" serialNumber=\"urn:uuid:$uuid\"\nxmlns:v=\"http://cyclonedx.org/schema/ext/vulnerability/1.0\">\n\t<components>";
+        $total = 0;
+        $reported = 0;
         foreach($this->vulnerabilities as $ov)
         {
             $v = (array) $ov;
@@ -463,6 +466,8 @@ class Composer extends Command
             {
                 continue;
             }
+            $total++;
+            $is_vulnerable = array_key_exists("vulnerabilities", $v) ? (count($v['vulnerabilities']) > 0 ? true: false) : false;
             $purl = $v['coordinates'];
             $p = \explode("@", str_replace("pkg:composer/", "", $purl));
             $n = explode("/", $p[0]);
@@ -474,9 +479,61 @@ class Composer extends Command
             $xml .= "\t\t\t<name>$name</name>\n";
             $xml .= "\t\t\t<version>$version</version>\n";
             $xml .= "\t\t\t<purl>$purl</purl>\n";
+            if ($is_vulnerable)
+            {
+                $xml .= "\t\t\t<v:vulnerabilities>\n";
+                foreach ($v["vulnerabilities"] as $vulnerability) {
+                    if (!\array_key_exists("cve", $vulnerability))
+                    {
+                        continue;
+                    }
+                    else {
+                        $vid = array_key_exists("cve", $vulnerability) ? $vulnerability->cve : $vulnerability -> cwe;
+                        $xml .= "\t\t\t\t<v:vulnerability ref=\"$purl\">\n";
+                        $xml .= "\t\t\t\t\t<v:id>$vid</v:id>\n";
+                        $xml .= "\t\t\t\t</v:vulnerability>\n";
+                        $reported++;
+                    }
+                }
+                $xml .= "\t\t\t</v:vulnerabilities>\n";
+            }
+            
             $xml .= "\t\t</component>\n";
         }
-        $xml .= "\t<components>\n</bom>";
-        $this->info("Software BOM:\n$xml", 'v');    
+        $xml .= "\t</components>\n</bom>";
+        $this->info("Software BOM:\n$xml", 'v');
+        
+        try
+        {
+            $options = [
+                'headers' => [
+                    'Content-Type' => 'application/xml; charset=UTF8',
+                ],
+                'body' => $xml,
+            ];
+            $response = $client->post("/api/v2/scan/applications/$internal_appid/sources/bach?stageId=develop", $options);
+            $code = $response->getStatusCode();
+            if ($code != 202)
+            {
+                $this->error("HTTP request did not return 202: ".$code . ".");
+                return;
+    
+            }
+            else
+            {
+                $body = $response->getBody();
+                $r = json_decode($body, true);
+                $this->info("JSON response: $body", 'v');
+                $statusUrl = $r["statusUrl"];
+                $this->info("$total total components, $reported vulnerabilities reported.");
+                $this->info("IQ Server report status is at $server"."/". $statusUrl.".");
+            }    
+        }
+        catch (Exception $e)
+        {
+            $this->error("Exception thrown making HTTP request: ".$e->getMessage() . ".");
+            return;
+        }
+
     }
 }
