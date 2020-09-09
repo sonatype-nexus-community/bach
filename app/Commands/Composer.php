@@ -1,5 +1,6 @@
 <?php
 namespace App\Commands;
+error_reporting(E_ALL ^ E_DEPRECATED);
 
 use LaravelZero\Framework\Commands\Command;
 use Illuminate\Support\Facades\File;
@@ -282,7 +283,7 @@ class Composer extends Command
                 $this->info($package . ' ' .$constraint . ' (' .$v. ')');
                 $this->packages_versions[$package] = $v;
             } catch (\Throwable $th) {
-                $this->error("Error occurred determinig version for package ".$package . "(".$constraint.")". ": ".$th->getMessage().".");
+                $this->error("Error occurred determining version for package ".$package . "(".$constraint.")". ": ".$th->getMessage().".");
             }
         }        
     }
