@@ -12,6 +12,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use \Symfony\Component\Console\Helper\Table;
 use \Symfony\Component\Console\Helper\TableCell;
+use \Symfony\Component\Console\Helper\TableStyle;
 use \Symfony\Component\Console\Helper\TableSeparator;
 use Laminas\Text\Figlet\Figlet;
 
@@ -132,6 +133,13 @@ class Composer extends Command
                         $this->error($vuln['title']);
                         $table = new Table($this->output);
 
+                        $tableStyle = new TableStyle();
+
+                        $tableStyle
+                            ->setBorderFormat($this->get_severity_color($vuln['cvssScore']));
+
+                        $table->setStyle($tableStyle);
+
                         $table->addRow(["ID", $vuln['id']]);
                         $table->addRow(["Title", $vuln['title']]);
                         $table->addRow(["Description", $vuln['description']]);
@@ -189,6 +197,23 @@ class Composer extends Command
             break;
             default:
                 return "Low";
+        }
+    }
+
+    protected function get_severity_color($score) {
+        $float_score = (float) $score;
+        switch (true) {
+            case ($float_score >= 9):
+                return "<fg=red;options=bold> %s </>";
+            break;
+            case ($float_score >= 7 && $float_score < 9):
+                return "<fg=red> %s </>";
+            break;
+            case ($float_score >= 4 && $float_score < 7):
+                return "<fg=yellow> %s </>";
+            break;
+            default:
+                return "<fg=green> %s </>";
         }
     }
 
