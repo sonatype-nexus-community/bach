@@ -4,13 +4,16 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 
 use LaravelZero\Framework\Commands\Command;
 use Illuminate\Support\Facades\File;
-use LaravelZero\Framework\Components\Logo\FigletString as ZendLogo;
 use \Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use \Nadar\PhpComposerReader\ComposerReader;
 use \Nadar\PhpComposerReader\RequireSection;
 use PHLAK\SemVer\Version2;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use \Symfony\Component\Console\Helper\Table;
+use \Symfony\Component\Console\Helper\TableCell;
+use \Symfony\Component\Console\Helper\TableSeparator;
+use Laminas\Text\Figlet\Figlet;
 
 class Composer extends Command
 {
@@ -23,6 +26,8 @@ class Composer extends Command
      * The packages specified as requirements
      */
     protected $packages = [];
+
+    protected $vulnerableDependencies = 0;
 
     protected $packages_versions = [];
 
@@ -82,7 +87,7 @@ class Composer extends Command
             return;
         }
         $this->get_packages($reader);
-        $this->comment("Parsed " . \count($this->packages) . " packages from " . $this->file . ":");
+
         if (count($this->packages) == 0)
         {
             $this->warn("No packages found to audit.");
@@ -92,57 +97,99 @@ class Composer extends Command
         $this->lock_file = dirname($this->file). DIRECTORY_SEPARATOR . 'composer.lock';
         if (File::exists($this->lock_file))
         {
-            $this->comment("Composer lock file found at ".$this->lock_file). '.';
             $this->get_lock_file_packages($this->lock_file);
         }
         else {
             $this->warn("Did not find composer lock file found at ".$this->lock_file). '.' . ' Transitive package dependencies will not be audited.';
         }            
-        $this->comment(count($this->packages) . " total packages to audit:");
         $this->get_packages_versions();
         $this->get_coordinates();
         $this->get_vulns();
-        if(count($this->vulnerabilities) == 0)
-        {
+        if(count($this->vulnerabilities) == 0) {
             $this->error("Did not receieve any data from OSS Index API.");
             return;
         }
-        else
-        {
+        else {
             $this->comment("");
-            $this->comment("Audit results:");
-            $this->info("==============");
+            $this->comment("Vulnerable Packages");
+            $this->comment("");
+
             foreach($this->vulnerabilities as $v)
             {
                 if (!array_key_exists("coordinates", $v))
                 {
                     continue;
                 }
-                $p = "PACKAGE: " . str_replace("pkg:composer/", "", $v['coordinates']);
-                $d = array_key_exists("description", $v) ? "DESC: " . $v['description'] : "";
                 $is_vulnerable = array_key_exists("vulnerabilities", $v) ? (count($v['vulnerabilities']) > 0 ? true: false) : false;
-                $is_vulnerable_text = "VULN: " . ($is_vulnerable ? "Yes" : "No");
-                if(!$is_vulnerable) {
-                    $this->info($p . " " . $d . " " . $is_vulnerable_text);
-                }
-                else {
-                    $this->error($p . " " . $d . " " . $is_vulnerable_text);
+                if ($is_vulnerable) {
+                    $this->vulnerableDependencies++;
+                    $p = "Package: " . $v['coordinates'];
+                    $d = array_key_exists("description", $v) ? "Description: " . $v['description'] : "";
+                    $this->comment($p);
+                    $this->comment($d);
                     foreach($v["vulnerabilities"] as $vuln)
                     {
-                        foreach($vuln as $key => $value)
-                        {
-                            $this->comment("  " . $key . ": ".$value);
+                        $this->error($vuln['title']);
+                        $table = new Table($this->output);
+
+                        $table->addRow(["ID", $vuln['id']]);
+                        $table->addRow(["Title", $vuln['title']]);
+                        $table->addRow(["Description", $vuln['description']]);
+                        $table->addRow(["CVSS Score", $vuln['cvssScore'] . " - " . $this->get_severity($vuln['cvssScore'])]);
+                        $table->addRow(["CVSS Vector", $vuln['cvssVector']]);
+                        if (array_key_exists('cve', $vuln)) {
+                            $table->addRow(["CVE", $vuln['cve']]);
+                        } else {
+                            $table->addRow(["CWE", $vuln['cwe']]);
                         }
+
+                        $table->addRow(["Reference", $vuln['reference']]);
+
+                        $table->setColumnMaxWidth(0, 15);
+                        $table->setColumnMaxWidth(1, 100);
+
+                        $table->render();
                     }
                 }                
             }
         }
+        $table = new Table($this->output);
+
+        $table->setStyle('box-double');
+
+        $table->setHeaders([
+            [new TableCell('Summary', ['colspan' => 2])],
+        ]);
+        $table->addRow(['Audited Dependencies', count($this->packages)]);
+        $table->addRow(['Vulnerable Dependencies', $this->vulnerableDependencies]);
+        $table->render();
     }
 
     protected function show_logo()
     {
-        $l = new ZendLogo('Bach', []);
-        echo $l;
+        $figlet = new Figlet();
+        $figlet->setFont(dirname(__FILE__) . '/larry3d.flf');
+        echo $figlet->render('Bach');
+
+        $figlet->setFont(dirname(__FILE__) . '/pepper.flf');
+        echo $figlet->render('By Sonatype & Friends');
+    }
+
+    protected function get_severity($score) {
+        $float_score = (float) $score;
+        switch (true) {
+            case ($float_score >= 9):
+                return "Critical";
+            break;
+            case ($float_score >= 7 && $float_score < 9):
+                return "High";
+            break;
+            case ($float_score >= 4 && $float_score < 7):
+                return "Medium";
+            break;
+            default:
+                return "Low";
+        }
     }
 
     protected function get_packages($reader)
@@ -164,7 +211,6 @@ class Composer extends Command
             if (!\array_key_exists($n, $this->packages))
             { 
                 $this->packages[$n] = $v;
-
             }
             else if (array_key_exists($n, $this->packages) && $this->packages[$n] != $v)
             { 
@@ -200,10 +246,6 @@ class Composer extends Command
             }
         }
         $count = count($this->packages);
-        if ($count > $orig_count)
-        {
-            $this->comment("Added ".($count - $orig_count). " packages from Composer lock file at ".$lock_file.".");
-        }
     }
 
     protected function get_version($constraint)
@@ -232,7 +274,6 @@ class Composer extends Command
                 case '~':
                     return $v->incrementMinor();
                 default:
-                    $this->warn("Did not determine version operator for constraint ". $constraint . ".");
                     return $v;
             }
         }
@@ -257,7 +298,7 @@ class Composer extends Command
         }
         else
         {
-            $this->warn("Could not determine version operator for constraint ".$constraint.".");
+            //$this->warn("Could not determine version operator for constraint ".$constraint.".");
             return $constraint;
         }
     }
@@ -280,7 +321,6 @@ class Composer extends Command
             }
             try {
                 $v = $this->get_version($c);
-                $this->info($package . ' ' .$constraint . ' (' .$v. ')');
                 $this->packages_versions[$package] = $v;
             } catch (\Throwable $th) {
                 $this->error("Error occurred determining version for package ".$package . "(".$constraint.")". ": ".$th->getMessage().".");
