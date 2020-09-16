@@ -19,14 +19,14 @@ class ComposerParser implements Parse
     public function get_packages() : array {
         $reader = new ComposerReader($this->file);
         if (!$reader->canRead()) {
-            $this->error("Could not read composer file " . $this->argument('file') ."." );
+            echo "Could not read composer file " . $this->file . ".";
             return [];
         }
         $packages = $this->__get_packages($reader);
 
         if (count($packages) == 0)
         {
-            $this->warn("No packages found to audit.");
+            echo "No packages found to audit.";
             return [];
         }
 
@@ -119,7 +119,7 @@ class ComposerParser implements Parse
                 case '<=':
                     return $v;
                 default:
-                    $this->warn("Did not determine version operator for constraint ". $constraint . ".");
+                    echo "Did not determine version operator for constraint " . $constraint . ".";
                     return $v;
 
             }
@@ -130,7 +130,6 @@ class ComposerParser implements Parse
         }
         else
         {
-            //$this->warn("Could not determine version operator for constraint ".$constraint.".");
             return $constraint;
         }
     }
