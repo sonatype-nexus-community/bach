@@ -23,12 +23,6 @@ class Composer extends Command
      */
     protected $packages = [];
 
-    protected $packages_versions = [];
-
-    protected $coordinates = array("coordinates" => []);
-
-    protected $vulnerabilities = [];
-
     protected $styles = [];
 
     public function __construct()
@@ -95,21 +89,22 @@ class Composer extends Command
         }
         else {
             $this->warn("Did not find composer lock file found at ".$this->lock_file). '.' . ' Transitive package dependencies will not be audited.';
-        }            
-        $this->get_packages_versions();
-        $this->get_coordinates();
+        }
+
+        $packages_versions = $this->get_packages_versions();
+        $coordinates = $this->get_coordinates($packages_versions);
+        
         $ossindex = new OSSIndex();
+        $vulnerabilities = $ossindex->get_vulns($coordinates);
 
-        $this->vulnerabilities = $ossindex->get_vulns($this->coordinates);
-
-        if(count($this->vulnerabilities) == 0) {
+        if(count($vulnerabilities) == 0) {
             $this->error("Did not receieve any data from OSS Index API.");
             return;
         }
         else {
             $audit = new AuditText();
 
-            $audit->audit_results($this->packages, $this->vulnerabilities, $this->output);
+            $audit->audit_results($this->packages, $vulnerabilities, $this->output);
         }
     }
 
@@ -208,6 +203,8 @@ class Composer extends Command
 
     protected function get_packages_versions()
     {
+        $packages_versions = [];
+
         foreach($this->packages as $package=>$constraint) 
         {
             $c = $constraint;
@@ -224,19 +221,23 @@ class Composer extends Command
             }
             try {
                 $v = $this->get_version($c);
-                $this->packages_versions[$package] = $v;
+                $packages_versions[$package] = $v;
             } catch (\Throwable $th) {
                 //
             }
-        }        
+        }
+
+        return $packages_versions;        
     }
 
-    protected function get_coordinates()
+    private function get_coordinates($packages_versions)
     {
         $pkgs = [];
-        foreach($this->packages_versions as $package=>$version) 
+        $coordinates["coordinates"] = [];
+        foreach($packages_versions as $package=>$version) 
         {
-            array_push($this->coordinates["coordinates"], "pkg:composer/" . $package . "@". $version);
+            array_push($coordinates["coordinates"], "pkg:composer/" . $package . "@". $version);
         }
+        return $coordinates;
     }
 }
