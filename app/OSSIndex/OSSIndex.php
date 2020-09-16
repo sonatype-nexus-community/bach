@@ -35,7 +35,7 @@ class OSSIndex
         }
         catch (Exception $e)
         {
-            $this->error("Exception thrown making HTTP request: ".$e->getMessage() . ".");
+            echo "Exception thrown making HTTP request: " . $e->getMessage() . ".";
             return [];
         }
     }
