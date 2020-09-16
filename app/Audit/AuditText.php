@@ -9,8 +9,6 @@ use Codedungeon\PHPCliColors\Color;
 
 class AuditText implements Audit
 {
-    private $vulnerabilities = [];
-
     private $vulnerableDependencies = 0;
 
     public function audit_results($packages, $vulnerabilities, $output) {
