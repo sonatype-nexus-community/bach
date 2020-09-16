@@ -23,7 +23,7 @@ class OSSIndex
             $code = $response->getStatusCode();
             if ($code != 200)
             {
-                $this->error("HTTP request did not return 200 OK: ".$code . ".");
+                echo "HTTP request did not return 200 OK: " . $code . ".";
                 return;
     
             }
