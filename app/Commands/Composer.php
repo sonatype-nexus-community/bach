@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\File;
 use \Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use \Nadar\PhpComposerReader\ComposerReader;
 use \Nadar\PhpComposerReader\RequireSection;
-use PHLAK\SemVer\Version2;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use \Symfony\Component\Console\Helper\Table;
@@ -15,6 +14,7 @@ use \Symfony\Component\Console\Helper\TableCell;
 use \Symfony\Component\Console\Helper\TableStyle;
 use \Symfony\Component\Console\Helper\TableSeparator;
 use Laminas\Text\Figlet\Figlet;
+use Codedungeon\PHPCliColors\Color;
 
 class Composer extends Command
 {
@@ -126,17 +126,18 @@ class Composer extends Command
                     $this->vulnerableDependencies++;
                     $p = "Package: " . $v['coordinates'];
                     $d = array_key_exists("description", $v) ? "Description: " . $v['description'] : "";
-                    $this->comment($p);
-                    $this->comment($d);
+                    echo Color::LIGHT_WHITE, $p, Color::RESET, PHP_EOL;
+                    echo $d . "\n" . "Scan status: " . count($v['vulnerabilities']) . " vulnerabilities found." . "\n";
                     foreach($v["vulnerabilities"] as $vuln)
                     {
-                        $this->error($vuln['title']);
+                        $this->get_severity_title($vuln['cvssScore'], "[" . $this->get_severity($vuln['cvssScore']) . " Threat]" . $vuln['title']);
+
                         $table = new Table($this->output);
 
                         $tableStyle = new TableStyle();
 
                         $tableStyle
-                            ->setBorderFormat($this->get_severity_color($vuln['cvssScore']));
+                            ->setBorderFormat($this->get_severity_table_color($vuln['cvssScore']));
 
                         $table->setStyle($tableStyle);
 
@@ -158,7 +159,7 @@ class Composer extends Command
 
                         $table->render();
                     }
-                }                
+                }           
             }
         }
         $table = new Table($this->output);
@@ -200,7 +201,7 @@ class Composer extends Command
         }
     }
 
-    protected function get_severity_color($score) {
+    protected function get_severity_table_color($score) {
         $float_score = (float) $score;
         switch (true) {
             case ($float_score >= 9):
@@ -214,6 +215,23 @@ class Composer extends Command
             break;
             default:
                 return "<fg=green> %s </>";
+        }
+    }
+
+    protected function get_severity_title($score, $text) {
+        $float_score = (float) $score;
+        switch (true) {
+            case ($float_score >= 9):
+                echo "\t", Color::LIGHT_RED, $text, Color::RESET, PHP_EOL;
+            break;
+            case ($float_score >= 7 && $float_score < 9):
+                echo "\t", Color::LIGHT_ORANGE, $text, Color::RESET, PHP_EOL;
+            break;
+            case ($float_score >= 4 && $float_score < 7):
+                echo "\t", Color::LIGHT_YELLOW, $text, Color::RESET, PHP_EOL;
+            break;
+            default:
+                echo "\t", Color::LIGHT_GREEN, $text, Color::RESET, PHP_EOL;
         }
     }
 
@@ -240,34 +258,6 @@ class Composer extends Command
             else if (array_key_exists($n, $this->packages) && $this->packages[$n] != $v)
             { 
                 $this->packages[$n] = $v;
-            }
-
-            if (\array_key_exists("require", $p))
-            {
-                foreach ($p["require"] as $rn => $rv) {
-                    if (!\array_key_exists($rn, $this->packages))
-                    { 
-                        $this->packages[$rn] = $rv;
-                    }
-                    else if (array_key_exists($rn, $this->packages) && $this->packages[$rn] != $rv)
-                    { 
-                        $this->packages[$rn] = $rv;
-                    }
-                }
-            }
-
-            if (\array_key_exists("require-dev", $p))
-            {
-                foreach ($p["require-dev"] as $rn => $rv) {
-                    if (!\array_key_exists($rn, $this->packages))
-                    { 
-                        $this->packages[$rn] = $rv;
-                    }
-                    else if (array_key_exists($rn, $this->packages) && $this->packages[$rn] != $rv)
-                    { 
-                        $this->packages[$rn] = $rv;
-                    }
-                }
             }
         }
         $count = count($this->packages);
@@ -348,7 +338,7 @@ class Composer extends Command
                 $v = $this->get_version($c);
                 $this->packages_versions[$package] = $v;
             } catch (\Throwable $th) {
-                $this->error("Error occurred determining version for package ".$package . "(".$constraint.")". ": ".$th->getMessage().".");
+                //
             }
         }        
     }
@@ -358,7 +348,7 @@ class Composer extends Command
         $pkgs = [];
         foreach($this->packages_versions as $package=>$version) 
         {
-            array_push($this->coordinates["coordinates"], "pkg:composer/" . $package . "@".$version);
+            array_push($this->coordinates["coordinates"], "pkg:composer/" . $package . "@". $version);
         }
     }
 

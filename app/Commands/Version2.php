@@ -1,11 +1,13 @@
 <?php
 
-namespace PHLAK\SemVer;
+namespace App\Commands;
 
-use PHLAK\SemVer\Exceptions\InvalidVersionException;
+use vierbergenlars\SemVer\version;
 
 class Version2
 {
+    protected $version = '';
+
     /** @var int Major release number */
     protected $major;
 
@@ -44,6 +46,25 @@ class Version2
     }
 
     /**
+     * Set (override) the entire version value.
+     *
+     * @param string $version Version string
+     *
+     * @return Version This Version object
+     */
+    public function setVersion($version)
+    {
+        $this->version = new version($version);
+
+        $this->major = $this->version->getMajor();
+        $this->minor = $this->version->getMinor();
+        $this->patch = $this->version->getPatch();
+        $this->build = $this->version->getBuild();
+
+        return $this;
+    }
+
+    /**
      * Magic toString method; allows object interaction as if it were a string.
      *
      * @param string $prefix Prefix the version string with a custom string
@@ -53,31 +74,17 @@ class Version2
      */
     public function __toString()
     {
-        return $this->toString(null);
+        return $this->toString();
     }
 
     /**
-     * Set (override) the entire version value.
+     * Get the current version value as a string.
      *
-     * @param string $version Version string
-     *
-     * @return Version This Version object
+     * @return string Current version string
      */
-    public function setVersion($version)
+    private function toString()
     {
-        $semverRegex = '/^v?(\d+)\.(\d+)(\.)?(\d+)?(?:-([0-9A-Z-.]+))?(?:\+([0-9A-Z-.]+)?)?$/i';
-
-        if (! preg_match($semverRegex, $version, $matches)) {
-            throw new InvalidVersionException('Invalid Semantic Version string provided');
-        }
-
-        $this->major = (int) $matches[1];
-        $this->minor = @$matches[2] ? (int) $matches[2] : 0;
-        $this->patch = @$matches[3] ? (int) $matches[3] : 0;
-        $this->preRelease = @$matches[4] ?: null;
-        $this->build = @$matches[5] ?: null;
-
-        return $this;
+        return $this->version->getVersion();
     }
 
     public function decrement()
@@ -369,32 +376,5 @@ class Version2
         }
 
         return false;
-    }
-
-    /**
-     * Get the version string prefixed with a custom string.
-     *
-     * @param string $prefix String to prepend to the version string
-     *                       (default: 'v')
-     *
-     * @return string Prefixed version string
-     */
-    public function prefix($prefix = 'v')
-    {
-        return $prefix . $this->toString();
-    }
-
-    /**
-     * Get the current version value as a string.
-     *
-     * @return string Current version string
-     */
-    private function toString()
-    {
-        $version = implode('.', [$this->major, $this->minor, $this->patch]);
-        $version .= isset($this->preRelease) ? '-' . $this->preRelease : null;
-        $version .= isset($this->build) ? '+' . $this->build : null;
-
-        return $version;
     }
 }
