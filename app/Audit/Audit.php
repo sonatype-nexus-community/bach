@@ -1,6 +1,5 @@
 <?php
 namespace App\Audit;
-error_reporting(E_ALL ^ E_DEPRECATED);
 
 interface Audit
 {
