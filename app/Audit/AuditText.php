@@ -11,23 +11,23 @@ class AuditText implements Audit
 {
     private $vulnerableDependencies = 0;
 
-    public function audit_results($packages, $vulnerabilities, $output) : int {
+    public function audit_results($packages, $response, $output) : int {
         $output->text("\n" . "Vulnerable Packages" . "\n");
 
-        foreach($vulnerabilities as $v)
+        foreach($response as $r)
         {
-            if (!array_key_exists("coordinates", $v))
+            if (!array_key_exists("coordinates", $r))
             {
                 continue;
             }
-            $is_vulnerable = array_key_exists("vulnerabilities", $v) ? (count($v['vulnerabilities']) > 0 ? true: false) : false;
+            $is_vulnerable = array_key_exists("vulnerabilities", $r) ? (count($r['vulnerabilities']) > 0 ? true: false) : false;
             if ($is_vulnerable) {
                 $this->vulnerableDependencies++;
-                $p = "Package: " . $v['coordinates'];
-                $d = array_key_exists("description", $v) ? "Description: " . $v['description'] : "";
+                $p = "Package: " . $r['coordinates'];
+                $d = array_key_exists("description", $r) ? "Description: " . $r['description'] : "";
                 echo Color::LIGHT_WHITE, $p, Color::RESET, PHP_EOL;
-                echo $d . "\n" . "Scan status: " . count($v['vulnerabilities']) . " vulnerabilities found." . "\n";
-                foreach($v["vulnerabilities"] as $vuln) {
+                echo $d . "\n" . "Scan status: " . count($r['vulnerabilities']) . " vulnerabilities found." . "\n";
+                foreach($r["vulnerabilities"] as $vuln) {
                     $this->output_vuln_table($vuln, $output);
                 }
             }           

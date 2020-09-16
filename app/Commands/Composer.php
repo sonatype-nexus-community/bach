@@ -68,16 +68,16 @@ class Composer extends Command
         $coordinates = $parser->get_coordinates($packages);
         
         $ossindex = new OSSIndex();
-        $vulnerabilities = $ossindex->get_vulns($coordinates);
+        $response = $ossindex->get_vulns($coordinates);
 
-        if(count($vulnerabilities) == 0) {
+        if(count($response) == 0) {
             $this->error("Did not receieve any data from OSS Index API.");
             return 1;
         }
         else {
             $audit = new AuditText();
 
-            $vulns = $audit->audit_results($packages, $vulnerabilities, $this->output);
+            $vulns = $audit->audit_results($packages, $response, $this->output);
 
             if ($vulns > 0) {
                 return 1;
