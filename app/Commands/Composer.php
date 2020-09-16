@@ -130,7 +130,7 @@ class Composer extends Command
                     echo $d . "\n" . "Scan status: " . count($v['vulnerabilities']) . " vulnerabilities found." . "\n";
                     foreach($v["vulnerabilities"] as $vuln)
                     {
-                        $this->get_severity_title($vuln['cvssScore'], "[" . $this->get_severity($vuln['cvssScore']) . " Threat]" . $vuln['title']);
+                        $this->get_severity_title($vuln['cvssScore'], "[" . $this->get_severity($vuln['cvssScore']) . " Threat] " . $vuln['title']);
 
                         $table = new Table($this->output);
 
