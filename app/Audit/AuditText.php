@@ -11,7 +11,7 @@ class AuditText implements Audit
 {
     private $vulnerableDependencies = 0;
 
-    public function audit_results($packages, $vulnerabilities, $output) {
+    public function audit_results($packages, $vulnerabilities, $output) : int {
         $output->text("\n" . "Vulnerable Packages" . "\n");
 
         foreach($vulnerabilities as $v)
@@ -33,6 +33,8 @@ class AuditText implements Audit
             }           
         }
         $this->output_summary_table($packages, $output);
+
+        return $this->vulnerableDependencies;
     }
 
     private function output_summary_table($packages, $output) {

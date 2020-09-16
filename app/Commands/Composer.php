@@ -99,12 +99,19 @@ class Composer extends Command
 
         if(count($vulnerabilities) == 0) {
             $this->error("Did not receieve any data from OSS Index API.");
-            return;
+            return 1;
         }
         else {
             $audit = new AuditText();
 
-            $audit->audit_results($this->packages, $vulnerabilities, $this->output);
+            $vulns = $audit->audit_results($this->packages, $vulnerabilities, $this->output);
+
+            if ($vulns > 0) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
         }
     }
 
