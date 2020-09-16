@@ -5,8 +5,6 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 use LaravelZero\Framework\Commands\Command;
 use Illuminate\Support\Facades\File;
 use \Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use \Nadar\PhpComposerReader\ComposerReader;
-use \Nadar\PhpComposerReader\RequireSection;
 use Laminas\Text\Figlet\Figlet;
 use App\Audit\AuditText;
 use App\OSSIndex\OSSIndex;
