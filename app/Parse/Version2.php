@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands;
+namespace App\Parse;
 
 use vierbergenlars\SemVer\version;
 
@@ -74,7 +74,7 @@ class Version2
      */
     public function __toString()
     {
-        return $this->toString();
+        return $this->toString(null);
     }
 
     /**

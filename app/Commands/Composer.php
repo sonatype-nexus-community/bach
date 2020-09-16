@@ -10,6 +10,7 @@ use \Nadar\PhpComposerReader\RequireSection;
 use Laminas\Text\Figlet\Figlet;
 use App\Audit\AuditText;
 use App\OSSIndex\OSSIndex;
+use App\Parse\ComposerParser;
 
 class Composer extends Command
 {
@@ -17,11 +18,6 @@ class Composer extends Command
      * The Composer package manifest to audit
      */
     protected $file;
-
-    /**
-     * The packages specified as requirements
-     */
-    protected $packages = [];
 
     protected $styles = [];
 
@@ -69,30 +65,12 @@ class Composer extends Command
         }
     
         $this->file = realpath($this->argument('file'));
-        $reader = new ComposerReader($this->file);
-        if (!$reader->canRead()) {
-            $this->error("Could not read composer file " . $this->argument('file') ."." );
-            return;
-        }
-        $this->get_packages($reader);
 
-        if (count($this->packages) == 0)
-        {
-            $this->warn("No packages found to audit.");
-            return;
-        }
+        $parser = new ComposerParser($this->file);
 
-        $this->lock_file = dirname($this->file). DIRECTORY_SEPARATOR . 'composer.lock';
-        if (File::exists($this->lock_file))
-        {
-            $this->get_lock_file_packages($this->lock_file);
-        }
-        else {
-            $this->warn("Did not find composer lock file found at ".$this->lock_file). '.' . ' Transitive package dependencies will not be audited.';
-        }
+        $packages = $parser->get_packages();
 
-        $packages_versions = $this->get_packages_versions();
-        $coordinates = $this->get_coordinates($packages_versions);
+        $coordinates = $parser->get_coordinates($packages);
         
         $ossindex = new OSSIndex();
         $vulnerabilities = $ossindex->get_vulns($coordinates);
@@ -104,7 +82,7 @@ class Composer extends Command
         else {
             $audit = new AuditText();
 
-            $vulns = $audit->audit_results($this->packages, $vulnerabilities, $this->output);
+            $vulns = $audit->audit_results($packages, $vulnerabilities, $this->output);
 
             if ($vulns > 0) {
                 return 1;
@@ -123,128 +101,5 @@ class Composer extends Command
 
         $figlet->setFont(dirname(__FILE__) . '/pepper.flf');
         echo $figlet->render('By Sonatype & Friends');
-    }
-
-    protected function get_packages($reader)
-    {
-        $section = new RequireSection($reader);
-        foreach($section as $package) {
-            $this->packages[$package->name] = $package->constraint;
-        }
-    }
-
-    protected function get_lock_file_packages($lock_file)
-    {
-        $orig_count = count($this->packages);
-        $data = \json_decode(\file_get_contents($lock_file), true);
-        $lfp = $data["packages"];
-        foreach ($lfp as $p)  {
-            $n = $p["name"];
-            $v = $p["version"];
-            if (!\array_key_exists($n, $this->packages))
-            { 
-                $this->packages[$n] = $v;
-            }
-            else if (array_key_exists($n, $this->packages) && $this->packages[$n] != $v)
-            { 
-                $this->packages[$n] = $v;
-            }
-        }
-        $count = count($this->packages);
-    }
-
-    protected function get_version($constraint)
-    {
-        $range_prefix_tokens = array('>', '<', '=', '^', '~');
-        
-        $length = strlen($constraint);
-        $start = 0;
-        $end = $length - 1;
-        if (!in_array($constraint[$start], $range_prefix_tokens) && is_numeric($constraint[$start]) && $constraint[$end] != '*')
-        {
-            return new Version2($constraint);
-        }
-        elseif (in_array($constraint[$start], $range_prefix_tokens) && !in_array($constraint[$start + 1], $range_prefix_tokens) 
-            && is_numeric($constraint[$start + 1]) && $constraint[$end] != '*')
-        {
-            $v = new Version2(substr($constraint, 1, $length - 1));
-            switch($constraint[$start])
-            {
-                case '=':
-                    return $v;
-                case '<':
-                    return $v->decrement();
-                case '>':
-                case '^':
-                case '~':
-                    return $v->incrementMinor();
-                default:
-                    return $v;
-            }
-        }
-        elseif (in_array($constraint[$start], $range_prefix_tokens) && in_array($constraint[$start + 1], $range_prefix_tokens) 
-            && $constraint[end] != '*')
-        {
-            $v = new Version2($substr($constraint,2, $length - 2));
-            switch($constraint[$start].$constraint[$start + 1])
-            {
-                case '>=':
-                case '<=':
-                    return $v;
-                default:
-                    $this->warn("Did not determine version operator for constraint ". $constraint . ".");
-                    return $v;
-
-            }
-        }
-        else if (!in_array($constraint[$start], $range_prefix_tokens) && is_numeric($constraint[$start]) && $constraint[$end] == '*')
-        {
-            return new Version2(str_replace('*', 0, $constraint));
-        }
-        else
-        {
-            //$this->warn("Could not determine version operator for constraint ".$constraint.".");
-            return $constraint;
-        }
-    }
-
-    protected function get_packages_versions()
-    {
-        $packages_versions = [];
-
-        foreach($this->packages as $package=>$constraint) 
-        {
-            $c = $constraint;
-            if (strpos($constraint, "||") !== false) {
-                $c = trim(explode("||", $constraint)[0]);
-            }
-            else if (strpos($constraint, "|") !== false) {
-                $c = trim(explode("|", $constraint)[0]);
-            }
-            $c = trim($c, "v");
-            if ($c == '*')
-            {
-                $c = '0.1';
-            }
-            try {
-                $v = $this->get_version($c);
-                $packages_versions[$package] = $v;
-            } catch (\Throwable $th) {
-                //
-            }
-        }
-
-        return $packages_versions;        
-    }
-
-    private function get_coordinates($packages_versions)
-    {
-        $pkgs = [];
-        $coordinates["coordinates"] = [];
-        foreach($packages_versions as $package=>$version) 
-        {
-            array_push($coordinates["coordinates"], "pkg:composer/" . $package . "@". $version);
-        }
-        return $coordinates;
     }
 }

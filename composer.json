@@ -10,13 +10,12 @@
     },
     "require": {
         "php": "^7.1.3",
-        "codedungeon/php-cli-colors": "^1.11",
         "eloquent/composer-config-reader": "^2.1",
         "guzzlehttp/guzzle": "6.3.3",
         "hoa/console": "^3.17",
         "intonate/tinker-zero": "^1.0",
         "laminas/laminas-text": "^2.7",
-        "laravel-zero/framework": "5.8.0",
+        "laravel-zero/framework": "5.8.*",
         "nadar/php-composer-reader": "^1.2",
         "vierbergenlars/php-semver": "^3.0",
         "zendframework/zend-text": "^2.7"
