@@ -12,9 +12,7 @@ class AuditText implements Audit
     private $vulnerableDependencies = 0;
 
     public function audit_results($packages, $vulnerabilities, $output) {
-        echo PHP_EOL;
-        echo "Vulnerable Packages";
-        echo PHP_EOL;
+        $output->text("\n" . "Vulnerable Packages" . "\n");
 
         foreach($vulnerabilities as $v)
         {
