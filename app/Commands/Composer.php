@@ -14,11 +14,6 @@ use App\Parse\ComposerParser;
 
 class Composer extends Command
 {
-    /**
-     * The Composer package manifest to audit
-     */
-    protected $file;
-
     protected $styles = [];
 
     public function __construct()
@@ -64,9 +59,9 @@ class Composer extends Command
             return;
         }
     
-        $this->file = realpath($this->argument('file'));
+        $file = realpath($this->argument('file'));
 
-        $parser = new ComposerParser($this->file);
+        $parser = new ComposerParser($file);
 
         $packages = $parser->get_packages();
 
