@@ -6,11 +6,13 @@ use GuzzleHttp\RequestOptions;
 
 class OSSIndex 
 {
+    private $base_uri = 'https://ossindex.sonatype.org/api/';
+
     public function get_vulns($coordinates)
     {
         $client = new Client([
             // Base URI is used with relative requests
-            'base_uri' => 'https://ossindex.sonatype.org/api/',
+            'base_uri' => $this->base_uri,
             // You can set any number of default request options.
             'timeout'  => 100.0,
         ]);
