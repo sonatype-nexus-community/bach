@@ -9,10 +9,9 @@ use Codedungeon\PHPCliColors\Color;
 
 class AuditText implements Audit
 {
-    private $vulnerableDependencies = 0;
-
     public function audit_results($packages, $response, $output) : int {
         $output->text("\n" . "Vulnerable Packages" . "\n");
+        $vulnerableDependencies = 0;
 
         foreach($response as $r)
         {
@@ -22,7 +21,7 @@ class AuditText implements Audit
             }
             $is_vulnerable = array_key_exists("vulnerabilities", $r) ? (count($r['vulnerabilities']) > 0 ? true: false) : false;
             if ($is_vulnerable) {
-                $this->vulnerableDependencies++;
+                $vulnerableDependencies++;
                 $p = "Package: " . $r['coordinates'];
                 $d = array_key_exists("description", $r) ? "Description: " . $r['description'] : "";
                 echo Color::LIGHT_WHITE, $p, Color::RESET, PHP_EOL;
@@ -32,12 +31,12 @@ class AuditText implements Audit
                 }
             }           
         }
-        $this->output_summary_table($packages, $output);
+        $this->output_summary_table($packages, $vulnerableDependencies, $output);
 
-        return $this->vulnerableDependencies;
+        return $vulnerableDependencies;
     }
 
-    private function output_summary_table($packages, $output) {
+    private function output_summary_table($packages, $vulnerableDependencies, $output) {
         $table = new Table($output);
 
         $table->setStyle('box-double');
@@ -46,7 +45,7 @@ class AuditText implements Audit
             [new TableCell('Summary', ['colspan' => 2])],
         ]);
         $table->addRow(['Audited Dependencies', count($packages)]);
-        $table->addRow(['Vulnerable Dependencies', $this->vulnerableDependencies]);
+        $table->addRow(['Vulnerable Dependencies', $vulnerableDependencies]);
         $table->render();
     }
 
