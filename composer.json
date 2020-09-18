@@ -14,9 +14,10 @@
         "guzzlehttp/guzzle": "6.3.3",
         "hoa/console": "^3.17",
         "intonate/tinker-zero": "^1.0",
+        "laminas/laminas-text": "^2.7",
         "laravel-zero/framework": "5.8.*",
         "nadar/php-composer-reader": "^1.2",
-        "phlak/semver": "^2.0",
+        "vierbergenlars/php-semver": "^3.0",
         "zendframework/zend-text": "^2.7"
     },
     "require-dev": {
