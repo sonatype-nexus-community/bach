@@ -26,8 +26,4 @@ class AuditTextTest extends TestCase
         $this->assertEquals(filesize($tmp_file_name), 4793);
         unlink($tmp_file_name);
     }
-
-    private function join_paths(...$paths) {
-        return preg_replace('~[/\\\\]+~', DIRECTORY_SEPARATOR, implode(DIRECTORY_SEPARATOR, $paths));
-    }
 }
