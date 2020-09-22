@@ -31,6 +31,7 @@ class OSSIndex
             }
             else
             {
+                echo $response->getBody();
                 $vulnerabilities = \json_decode($response->getBody(), true);
                 return $vulnerabilities;
             }    

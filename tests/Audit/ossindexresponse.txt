@@ -62,6 +62,43 @@
       ]
    },
    {
+      "coordinates":"pkg:composer/twig/twig@1.35.0",
+      "description":"Twig, the flexible, fast, and secure template language for PHP",
+      "reference":"https://ossindex.sonatype.org/component/pkg:composer/twig/twig@1.35.0",
+      "vulnerabilities":[
+         {
+            "id":"d543e392-ba83-4b22-9007-680e1288e418",
+            "displayName":"CVE-2019-9942",
+            "title":"[CVE-2019-9942]  Information Exposure",
+            "description":"A sandbox information disclosure exists in Twig before 1.38.0 and 2.x before 2.7.0 because, under some circumstances, it is possible to call the __toString() method on an object even if not allowed by the security policy in place.",
+            "cvssScore":3.7,
+            "cvssVector":"CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cve":"CVE-2019-9942",
+            "reference":"https://ossindex.sonatype.org/vuln/d543e392-ba83-4b22-9007-680e1288e418?component-type=composer&component-name=twig%2Ftwig&utm_source=guzzlehttp&utm_medium=integration&utm_content=6.3.3"
+         },
+         {
+            "id":"dcb38dcb-0cc2-4940-a087-0cde00a28067",
+            "displayName":"OSSINDEX-0cde-00a2-8067",
+            "title":"CWE-200: Information Exposure",
+            "description":"An information exposure is the intentional or unintentional disclosure of information to an actor that is not explicitly authorized to have access to that information.",
+            "cvssScore":4.3,
+            "cvssVector":"CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N",
+            "cwe":"CWE-200",
+            "reference":"https://ossindex.sonatype.org/vuln/dcb38dcb-0cc2-4940-a087-0cde00a28067?component-type=composer&component-name=twig%2Ftwig&utm_source=guzzlehttp&utm_medium=integration&utm_content=6.3.3"
+         },
+         {
+            "id":"f5e0eedd-a789-46e6-975a-342464e86cfb",
+            "displayName":"CVE-2018-13818",
+            "title":"[CVE-2018-13818]  Improper Control of Generation of Code (\"Code Injection\")",
+            "description":"** DISPUTED ** Twig before 2.4.4 allows Server-Side Template Injection (SSTI) via the search search_key parameter. NOTE: the vendor points out that Twig itself is not a web application and states that it is the responsibility of web applications using Twig to properly wrap input to it.",
+            "cvssScore":9.8,
+            "cvssVector":"CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cve":"CVE-2018-13818",
+            "reference":"https://ossindex.sonatype.org/vuln/f5e0eedd-a789-46e6-975a-342464e86cfb?component-type=composer&component-name=twig%2Ftwig&utm_source=guzzlehttp&utm_medium=integration&utm_content=6.3.3"
+         }
+      ]
+   },
+   {
       "coordinates":"pkg:composer/codedungeon/php-cli-colors@1.11.0",
       "description":"PHP Package for using color output in CLI commands",
       "reference":"https://ossindex.sonatype.org/component/pkg:composer/codedungeon/php-cli-colors@1.11.0",

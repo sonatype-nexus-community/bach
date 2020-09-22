@@ -21,7 +21,7 @@ class AuditTextTest extends TestCase
 
         $audit->audit_results($response, $output);
 
-        $this->assertEquals(filesize($this->join_paths(dirname(__FILE__), "auditTextTestResults.txt")), 442);
+        $this->assertEquals(filesize($this->join_paths(dirname(__FILE__), "auditTextTestResults.txt")), 4793);
         unlink($this->join_paths(dirname(__FILE__), "auditTextTestResults.txt"));
     }
 
