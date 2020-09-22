@@ -9,7 +9,7 @@ use Codedungeon\PHPCliColors\Color;
 
 class AuditText implements Audit
 {
-    public function audit_results($packages, $response, $output) : int {
+    public function audit_results($response, $output) : int {
         $output->text("\n" . "Vulnerable Packages" . "\n");
         $vulnerableDependencies = 0;
 
@@ -31,12 +31,12 @@ class AuditText implements Audit
                 }
             }           
         }
-        $this->output_summary_table($packages, $vulnerableDependencies, $output);
+        $this->output_summary_table(count($response), $vulnerableDependencies, $output);
 
         return $vulnerableDependencies;
     }
 
-    private function output_summary_table($packages, $vulnerableDependencies, $output) {
+    private function output_summary_table($packagesCount, $vulnerableDependencies, $output) {
         $table = new Table($output);
 
         $table->setStyle('box-double');
@@ -44,7 +44,7 @@ class AuditText implements Audit
         $table->setHeaders([
             [new TableCell('Summary', ['colspan' => 2])],
         ]);
-        $table->addRow(['Audited Dependencies', count($packages)]);
+        $table->addRow(['Audited Dependencies', $packagesCount]);
         $table->addRow(['Vulnerable Dependencies', $vulnerableDependencies]);
         $table->render();
     }
