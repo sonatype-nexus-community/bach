@@ -14,15 +14,17 @@ class AuditTextTest extends TestCase
         $file = file_get_contents($this->join_paths(dirname(__FILE__), "ossindexresponse.txt"));
         $response = json_decode($file, true);
 
-        $stream_output = new StreamOutput(fopen($this->join_paths(dirname(__FILE__), "auditTextTestResults.txt"), 'a', false));
+        $tmp_file_name = tempnam(dirname(__FILE__), "auditTextTest");
+
+        $stream_output = new StreamOutput(fopen($tmp_file_name, 'a', false));
         $string_input = new StringInput("");
         $output = new OutputStyle($string_input, $stream_output);
         $audit = new AuditText();
 
         $audit->audit_results($response, $output);
 
-        $this->assertEquals(filesize($this->join_paths(dirname(__FILE__), "auditTextTestResults.txt")), 4793);
-        unlink($this->join_paths(dirname(__FILE__), "auditTextTestResults.txt"));
+        $this->assertEquals(filesize($tmp_file_name), 4793);
+        unlink($tmp_file_name);
     }
 
     private function join_paths(...$paths) {
