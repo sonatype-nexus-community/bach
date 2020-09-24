@@ -1,3 +1,7 @@
+<p align="center">
+    <a href="https://circleci.com/gh/sonatype-nexus-community/bach"><img src="https://circleci.com/gh/sonatype-nexus-community/bach.svg?style=shield" alt="Circle CI Build Status"></img></a>
+</p>
+
 # Bach
 Dependency vulnerability auditor for PHP
 
