@@ -6,7 +6,6 @@ use Illuminate\Console\OutputStyle;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Input\StringInput;
 
-
 class AuditTextTest extends TestCase
 {
     public function testAuditTextAuditResults()
