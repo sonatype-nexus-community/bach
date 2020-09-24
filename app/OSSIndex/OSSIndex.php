@@ -21,7 +21,7 @@ class OSSIndex
     ) {
         if ($client == null) {
             $this->client = new Client(
-                ['base_uri' => 'http://httpbin.org',
+                ['base_uri' => 'https://ossindex.sonatype.org/api/',
                 'timeout' => 100.0,
             ]);
         } else {
