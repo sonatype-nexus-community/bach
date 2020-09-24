@@ -14,11 +14,11 @@ jobs:
           key: composer-v1-{{ checksum "composer.lock" }}
           paths:
             - vendor
-      - run: ./vendor/bin/phpunit tests --log-junit tests/test_results.xml
+      - run: ./vendor/bin/phpunit tests --log-junit tests/_output/test_results.xml
       - store_test_results:
-          path: tests/test_results.xml
+          path: tests/_output
       - store_artifacts:
-          path: tests/test_results.xml
+          path: tests/_output
 
 workflows:
   version: 2
