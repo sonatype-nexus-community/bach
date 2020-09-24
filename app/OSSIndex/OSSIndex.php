@@ -6,20 +6,34 @@ use GuzzleHttp\RequestOptions;
 
 class OSSIndex 
 {
-    private $base_uri = 'https://ossindex.sonatype.org/api/';
+    /**
+     * @var Client
+     */
+    private $client;
+
+    /**
+     * The passed in value must be a Guzzle Client
+     *
+     * @param Client|null $client
+     */
+    public function __construct(
+        $client = null
+    ) {
+        if ($client == null) {
+            $this->client = new Client(
+                ['base_uri' => 'http://httpbin.org',
+                'timeout' => 100.0,
+            ]);
+        } else {
+            $this->client = $client;
+        }
+    }
 
     public function get_vulns($coordinates)
     {
-        $client = new Client([
-            // Base URI is used with relative requests
-            'base_uri' => $this->base_uri,
-            // You can set any number of default request options.
-            'timeout'  => 100.0,
-        ]);
-        
         try
         {
-            $response = $client->post('v3/component-report', [
+            $response = $this->client->post('v3/component-report', [
                 RequestOptions::JSON => $coordinates
             ]);
             $code = $response->getStatusCode();
