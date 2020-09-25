@@ -66,6 +66,7 @@ class Composer extends Command
         $coordinates = $parser->get_coordinates($packages);
         
         $ossindex = new OSSIndex();
+
         $response = $ossindex->get_vulns($coordinates);
 
         if(count($response) == 0) {
@@ -75,7 +76,7 @@ class Composer extends Command
         else {
             $audit = new AuditText();
 
-            $vulns = $audit->audit_results($packages, $response, $this->output);
+            $vulns = $audit->audit_results($response, $this->output);
 
             if ($vulns > 0) {
                 return 1;
