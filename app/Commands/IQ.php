@@ -6,22 +6,16 @@ use LaravelZero\Framework\Commands\Command;
 use Illuminate\Support\Facades\File;
 use \Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Laminas\Text\Figlet\Figlet;
-use App\Audit\AuditText;
-use App\OSSIndex\OSSIndex;
 use App\CycloneDX\CycloneDX;
 use App\Parse\ComposerParser;
 
-class Composer extends Command
+class IQ extends Command
 {
     protected $styles = [];
 
     public function __construct()
     {
         parent::__construct();
-        $this->styles = array
-        (
-            // 'red' => new OutputFormatterStyle('red', null, ['bold']) //white text on red background
-        );
     }
 
     /**
@@ -29,7 +23,7 @@ class Composer extends Command
      *
      * @var string
      */
-    protected $signature = 'composer {file}:The composer package manifest to audit.';
+    protected $signature = 'iq {file}:The composer package manifest to audit.';
 
     /**
      * The description of the command.
@@ -65,27 +59,12 @@ class Composer extends Command
         $packages = $parser->get_packages();
 
         $coordinates = $parser->get_coordinates($packages);
-        
-        $ossindex = new OSSIndex();
 
-        $response = $ossindex->get_vulns($coordinates);
+        $cyclonedx = new CycloneDX();
 
-        if(count($response) == 0) {
-            $this->error("Did not receieve any data from OSS Index API.");
-            return 1;
-        }
-        else {
-            $audit = new AuditText();
+        $sbom = $cyclonedx->create_and_return_sbom($coordinates);
 
-            $vulns = $audit->audit_results($response, $this->output);
-
-            if ($vulns > 0) {
-                return 1;
-            }
-            else {
-                return 0;
-            }
-        }
+        echo $sbom;
     }
 
     protected function show_logo()
