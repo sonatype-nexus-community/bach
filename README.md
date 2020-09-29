@@ -97,12 +97,26 @@ Copyright (c) 1997-2018 The PHP Group
 Zend Engine v3.3.11, Copyright (c) 1998-2018 Zend Technologies
 ```
 
-I had to do a one time install using [brew](https://brew.sh) on macos:
-```
-brew install composer
-``` 
+I still had to do a one time install of [composer](https://getcomposer.org) using [brew](https://brew.sh) on macos:
+  ```
+  brew install composer
+  ``` 
 
 After running `composer install`, I could run unit tests using:
-```
-vendor/bin/phpunit tests
-```
+  ```
+  vendor/bin/phpunit tests
+  ```
+
+* You can cleanup composer.lock (remove stale dependencies from the composer.lock file)
+using the command:
+  ```
+  compser update
+  ```
+
+* If you need to add new dependencies, I found the following commands would
+ensure the new dependency was installed and available to unit tests, etc:
+  ```
+  composer update
+  composer install
+  vendor/bin/phpunit tests
+  ``` 
