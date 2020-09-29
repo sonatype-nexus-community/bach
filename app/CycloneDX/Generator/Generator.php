@@ -19,7 +19,8 @@ class Generator
 
         $writer = new XMLWriter;
         $writer->openMemory();
-        $writer->startDocument('1.0', 'UTF-8');
+        $writer->setIndent(false);
+        $writer->startDocument('1.0', 'utf-8');
         $writer->startElementNs(null, "bom", $this->xml_ns);
         $writer->startAttribute('version');
         $writer->text('1');
