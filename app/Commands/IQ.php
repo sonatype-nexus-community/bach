@@ -81,15 +81,24 @@ class IQ extends Command
 
         echo PHP_EOL;
 
+        if (!array_key_exists('policyAction', $response)) {
+            $this->error('There was an error communicating with Nexus IQ Server!');
+            print_r($response);
+            return 1;
+        }
+
         if ($response['policyAction'] == 'None') {
             $this->info('You have composed a masterpiece, no policy actions necessary, compose away!');
             $this->info('Report URL: ' . $response['reportHtmlUrl']);
+            return 0;
         } elseif ($response['policyAction'] == 'Warning') {
             $this->warn('Your masterpiece is looking good, but you have some warnings to look at. Pause and reflect on these.');
             $this->warn('Report URL: ' . $response['reportHtmlUrl']);
+            return 0;
         } elseif ($response['policyAction'] == 'Failure') {
             $this->error('Put down the wand, time to clean up some policy failures before you compose further!');
             $this->error('Report URL: ' . $response['reportHtmlUrl']);
+            return 1;
         }
     }
 
