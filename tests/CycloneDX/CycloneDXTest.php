@@ -10,14 +10,12 @@ class CycloneDXTest extends TestCase
 {
     public function testCycloneDXGetSBOM()
     {
-        // $file = file_get_contents($this->join_paths(dirname(__FILE__), "ossindexresponse.txt"));
         $cyclonedx = new CycloneDX();
 
         $coordinates = [];
         $list_of_coordinates = [];
         array_push($list_of_coordinates, "pkg:composer/thing/name@0.0.0", "pkg:composer/thing/anothername@1.0.0");
         $coordinates['coordinates'] = $list_of_coordinates;
-
 
         $sbom = $cyclonedx->create_and_return_sbom($coordinates);
 
