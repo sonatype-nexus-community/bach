@@ -24,7 +24,8 @@ class IQClient
         $client = null,
         $host = 'http://localhost:8070/',
         $username = 'admin',
-        $token = 'admin123'
+        $token = 'admin123',
+        $stage = 'develop'
     ) {
         if ($client == null) {
             $this->client = new Client(

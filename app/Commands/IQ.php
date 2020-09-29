@@ -28,6 +28,7 @@ class IQ extends Command
                             {--file= : The composer package manifest to audit.} 
                             {--application= : Your public application ID from Nexus IQ Server.}
                             {--host=http://localhost:8070 : Your Nexus IQ Servers base URL ex: "http://localhost:8070/"}
+                            {--stage=develop : The stage in Nexus IQ you want to evaluate your application with ex: "develop"}
                             {--user=admin : Your user name for connecting to Nexus IQ Server ex: "admin".}
                             {--token=admin123 : Your token for connecting to Nexus IQ Server ex: "admin123".}';
 
@@ -70,7 +71,7 @@ class IQ extends Command
 
         $sbom = $cyclonedx->create_and_return_sbom($coordinates);
 
-        $iq_client = new IQClient(null, $this->option('host'), $this->option('user'), $this->option('token'));
+        $iq_client = new IQClient(null, $this->option('host'), $this->option('user'), $this->option('token'), $this->option('stage'));
 
         $internal_id = $iq_client->get_internal_application_id($this->option('application'));
 
