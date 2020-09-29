@@ -47,6 +47,29 @@ class IQClientTest extends TestCase
         $this->assertEquals($status_url, "api/v2/scan/applications/a20bc16e83944595a94c2e36c1cd228e/status/9cee2b6366fc4d328edc318eae46b2cb");
     }
 
+    public function testIQClientPollURL()
+    {
+        $file = file_get_contents($this->join_paths(dirname(__FILE__), "iqpolicyresponse.txt"));
+
+        $mock = new MockHandler([
+            new Response(404, []),
+            new Response(200, [], $file)
+        ]);
+
+        $handlerStack = HandlerStack::create($mock);
+
+        $client = new Client([
+            'handler' => $handlerStack,
+            'http_errors' => false
+            ]);
+
+        $iq_client = new IQClient($client);
+
+        $response = $iq_client->poll_status_url("api/v2/scan/applications/a20bc16e83944595a94c2e36c1cd228e/status/9cee2b6366fc4d328edc318eae46b2cb");
+
+        $this->assertEquals($response['policyAction'], 'None');
+    }
+
     private function join_paths(...$paths) {
         return preg_replace('~[/\\\\]+~', DIRECTORY_SEPARATOR, implode(DIRECTORY_SEPARATOR, $paths));
     }
