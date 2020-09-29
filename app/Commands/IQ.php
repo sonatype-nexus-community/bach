@@ -70,7 +70,7 @@ class IQ extends Command
 
         $sbom = $cyclonedx->create_and_return_sbom($coordinates);
 
-        $iq_client = new IQClient();
+        $iq_client = new IQClient(null, $this->option('host'), $this->option('user'), $this->option('token'));
 
         $internal_id = $iq_client->get_internal_application_id($this->option('application'));
 
