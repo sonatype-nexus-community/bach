@@ -86,3 +86,23 @@ PACKAGE: nadar/php-composer-reader@1.3.0  VULN: No
 PACKAGE: phlak/semver@2.1.0  VULN: No
 PACKAGE: zendframework/zend-text@2.8.0 DESC:  VULN: No
 ```
+
+## Development notes
+
+On macos, while `php` was already installed, 
+```
+$ php --version
+PHP 7.3.11 (cli) (built: Jun  5 2020 23:50:40) ( NTS )
+Copyright (c) 1997-2018 The PHP Group
+Zend Engine v3.3.11, Copyright (c) 1998-2018 Zend Technologies
+```
+
+I had to do a one time install using [brew](https://brew.sh) on macos:
+```
+brew install composer
+``` 
+
+After running `composer install`, I could run unit tests using:
+```
+vendor/bin/phpunit tests
+```
