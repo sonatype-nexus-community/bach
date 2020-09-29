@@ -83,8 +83,7 @@ class IQ extends Command
         if ($response['policyAction'] == 'None') {
             $this->info('You have composed a masterpiece, no policy actions necessary, compose away!');
             $this->info('Report URL: ' . $response['reportHtmlUrl']);
-        }
-        elseif ($response['policyAction'] == 'Warning') {
+        } elseif ($response['policyAction'] == 'Warning') {
             $this->warn('Your masterpiece is looking good, but you have some warnings to look at. Pause and reflect on these.');
             $this->warn('Report URL: ' . $response['reportHtmlUrl']);
         } elseif ($response['policyAction'] == 'Failure') {
