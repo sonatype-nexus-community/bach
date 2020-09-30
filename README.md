@@ -106,7 +106,11 @@ After running `composer install`, I could run unit tests using:
   ```
   vendor/bin/phpunit tests
   ```
-
+  I'm not sure it is actually needed, but while updating `brew` and things, I ran into a case that
+  needed access to write to my local `bin` folders, and had to follow these steps to temporarily 
+  disable `csrutil`. see: https://www.imore.com/how-turn-system-integrity-protection-macos
+  Be sure to undo such changes if you need 'em.
+  
 * You can cleanup composer.lock (remove stale dependencies from the composer.lock file)
 using the command:
   ```
