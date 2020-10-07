@@ -75,7 +75,7 @@ class IQ extends Command
 
         $internal_id = $iq_client->get_internal_application_id($this->option('application'));
 
-        $status_url = $iq_client->submit_sbom($sbom, $internal_id, 'develop');
+        $status_url = $iq_client->submit_sbom($sbom, $internal_id);
 
         $response = $iq_client->poll_status_url($status_url);
 

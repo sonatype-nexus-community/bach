@@ -15,6 +15,8 @@ class IQClient
 
     private $token;
 
+    private $stage;
+
     /**
      * The passed in value must be a Guzzle Client
      *
@@ -40,6 +42,7 @@ class IQClient
 
         $this->username = $username;
         $this->token = $token;
+        $this->stage = $stage;
     }
 
     public function get_internal_application_id($public_application_name) {
@@ -73,10 +76,10 @@ class IQClient
         }
     }
 
-    public function submit_sbom($sbom, $internal_application_id, $stage) {
+    public function submit_sbom($sbom, $internal_application_id) {
         try
         {
-            $response = $this->client->post('api/v2/scan/applications/' . $internal_application_id . '/sources/bach?stageId=' . $stage, [
+            $response = $this->client->post('api/v2/scan/applications/' . $internal_application_id . '/sources/bach?stageId=' . $this->stage, [
                 'auth' => [
                     $this->username,
                     $this->token
