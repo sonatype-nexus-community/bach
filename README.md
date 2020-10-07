@@ -114,7 +114,7 @@ After running `composer install`, I could run unit tests using:
 * You can cleanup composer.lock (remove stale dependencies from the composer.lock file)
 using the command:
   ```
-  compser update
+  composer update
   ```
 
 * If you need to add new dependencies, I found the following commands would
