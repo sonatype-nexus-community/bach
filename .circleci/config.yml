@@ -15,7 +15,7 @@ jobs:
           paths:
             - vendor
       - run: ./vendor/bin/phpunit tests --log-junit tests/_output/test_results.xml
-      - run: ./vendor/bin/phplint ./ --exclude=vendor
+      - run: ./vendor/bin/phplint
       - store_test_results:
           path: tests/_output
       - store_artifacts:
