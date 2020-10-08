@@ -8,19 +8,29 @@ class Version2
 {
     protected $version = '';
 
-    /** @var int Major release number */
+    /**
+     * @var int Major release number
+     */
     protected $major;
 
-    /** @var int Minor release number */
+    /**
+     * @var int Minor release number
+     */
     protected $minor;
 
-    /** @var int Patch release number */
+    /**
+     * @var int Patch release number
+     */
     protected $patch;
 
-    /** @var string|null Pre-release value */
+    /**
+     * @var string|null Pre-release value
+     */
     protected $preRelease;
 
-    /** @var string Build release value */
+    /**
+     * @var string Build release value
+     */
     protected $build;
 
     /**
@@ -89,21 +99,13 @@ class Version2
 
     public function decrement()
     {
-        if ($this->major > 0)
-        {
+        if ($this->major > 0) {
             $this->decrementMajor();
-        }
-        else if ($this->minor > 0)
-        {
+        } elseif ($this->minor > 0) {
             $this->decrementMinor();
-
-        }
-        else if ($this->patch > 0)
-        {
+        } elseif ($this->patch > 0) {
             $this->decrementPatch();
-        }
-        else
-        {
+        } else {
             throw new InvalidVersionException("The current version is 0.0.0");
         }
         return $this;
@@ -129,8 +131,7 @@ class Version2
 
     public function decrementMajor()
     {
-        if ($this->major > 0)
-        {
+        if ($this->major > 0) {
             $this->setMajor($this->major - 1);
         }
         return $this;
@@ -167,8 +168,7 @@ class Version2
 
     public function decrementMinor()
     {
-        if ($this->minor > 0)
-        {
+        if ($this->minor > 0) {
             $this->setMinor($this->minor - 1);
         }
         return $this;
@@ -204,8 +204,7 @@ class Version2
 
     public function decrementPatch()
     {
-        if ($this->patch > 0)
-        {
+        if ($this->patch > 0) {
             $this->setPatch($this->patch - 1);
         }
         return $this;

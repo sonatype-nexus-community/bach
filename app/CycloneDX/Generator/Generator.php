@@ -3,19 +3,22 @@ namespace App\CycloneDX\Generator;
 
 use XMLWriter;
 
-class Generator 
+class Generator
 {
     private $xml_ns = "http://cyclonedx.org/schema/bom/1.1";
     private $xml_ns_v = "http://cyclonedx.org/schema/ext/vulnerability/1.0";
 
-    public function __construct() {
+    public function __construct()
+    {
     }
 
-    public function generate_sbom($coordinates) {
-        return $this->__generate_sbom($coordinates);
+    public function generateSbom($coordinates)
+    {
+        return $this->__generateSbom($coordinates);
     }
 
-    private function __generate_sbom($coordinates) {
+    private function __generateSbom($coordinates)
+    {
 
         $writer = new XMLWriter;
         $writer->openMemory();
@@ -27,8 +30,8 @@ class Generator
         $writer->endAttribute();
         $writer->startElement('components');
 
-        foreach($coordinates['coordinates'] as $coordinate) {
-            $this->__write_component($writer, $coordinate);
+        foreach ($coordinates['coordinates'] as $coordinate) {
+            $this->__writeComponent($writer, $coordinate);
         }
 
         $writer->endElement(); // components
@@ -38,7 +41,8 @@ class Generator
         return $writer->outputMemory();
     }
 
-    private function __write_component(XMLWriter $xml_writer, $coordinate) {
+    private function __writeComponent(XMLWriter $xml_writer, $coordinate)
+    {
         $exploded_coordinate = explode('@', $coordinate);
         $version = $exploded_coordinate[1];
         $name_group = explode('pkg:composer/', $exploded_coordinate[0]);
@@ -57,8 +61,7 @@ class Generator
             $xml_writer->startElement('name');
             $xml_writer->text($exploded_name_group[1]);
             $xml_writer->endElement();
-        }
-        else {
+        } else {
             $xml_writer->startElement('name');
             $xml_writer->text($exploded_name_group[0]);
             $xml_writer->endElement();

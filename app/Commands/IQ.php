@@ -1,5 +1,6 @@
 <?php
 namespace App\Commands;
+
 error_reporting(E_ALL ^ E_DEPRECATED);
 
 use LaravelZero\Framework\Commands\Command;
@@ -25,12 +26,12 @@ class IQ extends Command
      * @var string
      */
     protected $signature = 'iq 
-                            {--file= : The composer package manifest to audit.} 
-                            {--application= : Your public application ID from Nexus IQ Server.}
-                            {--host=http://localhost:8070 : Your Nexus IQ Servers base URL ex: "http://localhost:8070/"}
-                            {--stage=develop : The stage in Nexus IQ you want to evaluate your application with ex: "develop"}
-                            {--user=admin : Your user name for connecting to Nexus IQ Server ex: "admin".}
-                            {--token=admin123 : Your token for connecting to Nexus IQ Server ex: "admin123".}';
+            {--file= : The composer package manifest to audit.} 
+            {--application= : Your public application ID from Nexus IQ Server.}
+            {--host=http://localhost:8070 : Your Nexus IQ Servers base URL ex: "http://localhost:8070/"}
+            {--stage=develop : The stage in Nexus IQ you want to evaluate your application with ex: "develop"}
+            {--user=admin : Your user name for connecting to Nexus IQ Server ex: "admin".}
+            {--token=admin123 : Your token for connecting to Nexus IQ Server ex: "admin123".}';
 
     /**
      * The description of the command.
@@ -46,15 +47,13 @@ class IQ extends Command
      */
     public function handle()
     {
-        foreach($this->styles as $key => $value)
-        {
+        foreach ($this->styles as $key => $value) {
             $this->output->getFormatter()->setStyle($key, $value);
         }
 
-        $this->show_logo();
+        $this->showLogo();
         
-        if (!File::exists($this->option('file')))
-        {
+        if (!File::exists($this->option('file'))) {
             $this->error("The file " . $this->option('file') . " does not exist");
             return;
         }
@@ -71,13 +70,19 @@ class IQ extends Command
 
         $sbom = $cyclonedx->create_and_return_sbom($coordinates);
 
-        $iq_client = new IQClient(null, $this->option('host'), $this->option('user'), $this->option('token'), $this->option('stage'));
+        $iq_client = new IQClient(
+            null,
+            $this->option('host'),
+            $this->option('user'),
+            $this->option('token'),
+            $this->option('stage')
+        );
 
-        $internal_id = $iq_client->get_internal_application_id($this->option('application'));
+        $internal_id = $iq_client->getInternalApplicationId($this->option('application'));
 
-        $status_url = $iq_client->submit_sbom($sbom, $internal_id);
+        $status_url = $iq_client->submitSbom($sbom, $internal_id);
 
-        $response = $iq_client->poll_status_url($status_url);
+        $response = $iq_client->pollStatusUrl($status_url);
 
         echo PHP_EOL;
         if ($response->isError) {
@@ -85,12 +90,12 @@ class IQ extends Command
             return 1;
         }
 
-        $this->{$response->get_policy_action_warn_type()}($response->get_policy_action_text());
-        $this->{$response->get_policy_action_warn_type()}('Report URL: ' . $response->reportHtmlUrl);
-        return $response->get_exit_code();
+        $this->{$response->getPolicyActionWarnType()}($response->getPolicyActionText());
+        $this->{$response->getPolicyActionWarnType()}('Report URL: ' . $response->reportHtmlUrl);
+        return $response->getExitCode();
     }
 
-    protected function show_logo()
+    protected function showLogo()
     {
         $figlet = new Figlet();
         $figlet->setFont(dirname(__FILE__) . '/larry3d.flf');

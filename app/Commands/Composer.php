@@ -1,5 +1,6 @@
 <?php
 namespace App\Commands;
+
 error_reporting(E_ALL ^ E_DEPRECATED);
 
 use LaravelZero\Framework\Commands\Command;
@@ -45,15 +46,13 @@ class Composer extends Command
      */
     public function handle()
     {
-        foreach($this->styles as $key => $value)
-        {
+        foreach ($this->styles as $key => $value) {
             $this->output->getFormatter()->setStyle($key, $value);
         }
 
-        $this->show_logo();
+        $this->showLogo();
         
-        if (!File::exists($this->argument('file')))
-        {
+        if (!File::exists($this->argument('file'))) {
             $this->error("The file " . $this->argument('file') . " does not exist");
             return;
         }
@@ -68,27 +67,25 @@ class Composer extends Command
         
         $ossindex = new OSSIndex();
 
-        $response = $ossindex->get_vulns($coordinates);
+        $response = $ossindex->getVulns($coordinates);
 
-        if(count($response) == 0) {
+        if (count($response) == 0) {
             $this->error("Did not receieve any data from OSS Index API.");
             return 1;
-        }
-        else {
+        } else {
             $audit = new AuditText();
 
             $vulns = $audit->audit_results($response, $this->output);
 
             if ($vulns > 0) {
                 return 1;
-            }
-            else {
+            } else {
                 return 0;
             }
         }
     }
 
-    protected function show_logo()
+    protected function showLogo()
     {
         $figlet = new Figlet();
         $figlet->setFont(dirname(__FILE__) . '/larry3d.flf');

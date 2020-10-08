@@ -3,15 +3,17 @@ namespace App\CycloneDX;
 
 use App\CycloneDX\Generator\Generator;
 
-class CycloneDX 
+class CycloneDX
 {
     private $generator;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->generator = new Generator();
     }
 
-    public function create_and_return_sbom($coordinates) {
-        return $this->generator->generate_sbom($coordinates);
+    public function createAndReturnSbom($coordinates)
+    {
+        return $this->generator->generateSbom($coordinates);
     }
 }

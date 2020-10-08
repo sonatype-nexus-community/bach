@@ -4,7 +4,7 @@ namespace App\OSSIndex;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 
-class OSSIndex 
+class OSSIndex
 {
     /**
      * @var Client
@@ -23,35 +23,32 @@ class OSSIndex
             $this->client = new Client(
                 ['base_uri' => 'https://ossindex.sonatype.org/api/',
                 'timeout' => 100.0,
-            ]);
+                ]
+            );
         } else {
             $this->client = $client;
         }
     }
 
-    public function get_vulns($coordinates)
+    public function getVulns($coordinates)
     {
-        try
-        {
-            $response = $this->client->post('v3/component-report', [
+        try {
+            $response = $this->client->post(
+                'v3/component-report',
+                [
                 RequestOptions::JSON => $coordinates
-            ]);
+                ]
+            );
             $code = $response->getStatusCode();
-            if ($code != 200)
-            {
+            if ($code != 200) {
                 echo "HTTP request did not return 200 OK: " . $code . ".";
                 return;
-    
-            }
-            else
-            {
+            } else {
                 $vulnerabilities = \json_decode($response->getBody(), true);
                 
                 return $vulnerabilities;
-            }    
-        }
-        catch (Exception $e)
-        {
+            }
+        } catch (Exception $e) {
             echo "Exception thrown making HTTP request: " . $e->getMessage() . ".";
             return [];
         }

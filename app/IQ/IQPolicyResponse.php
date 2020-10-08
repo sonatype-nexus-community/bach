@@ -10,13 +10,15 @@ class IQPolicyResponse
     public array $openPolicyViolations;
     public int $grandfatheredPolicyViolations;
 
-    public function get_policy_action_text(): string {
+    public function getPolicyActionText(): string
+    {
         switch ($this->policyAction) {
             case 'Failure':
                 return 'Put down the wand, time to clean up some policy failures before you compose further!';
             break;
             case 'Warning':
-                return 'Your masterpiece is looking good, but you have some warnings to look at. Pause and reflect on these.';
+                return 'Your masterpiece is looking good, but you have some warnings to look at. 
+                Pause and reflect on these.';
             break;
             case 'None':
                 return 'You have composed a masterpiece, no policy actions necessary, compose away!';
@@ -24,7 +26,8 @@ class IQPolicyResponse
         }
     }
 
-    public function get_policy_action_warn_type(): string {
+    public function getPolicyActionWarnType(): string
+    {
         switch ($this->policyAction) {
             case 'Failure':
                 return 'error';
@@ -38,7 +41,8 @@ class IQPolicyResponse
         }
     }
 
-    public function get_exit_code(): int {
+    public function getExitCode(): int
+    {
         switch ($this->policyAction) {
             case 'Failure':
                 return 1;

@@ -3,5 +3,5 @@ namespace App\Audit;
 
 interface Audit
 {
-    public function audit_results($response, $output) : int;
+    public function auditResults($response, $output) : int;
 }

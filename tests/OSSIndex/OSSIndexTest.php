@@ -23,7 +23,7 @@ class OSSIndexTest extends TestCase
 
         $oss_index = new OSSIndex($client);
 
-        $vulns = $oss_index->get_vulns([]);
+        $vulns = $oss_index->getVulns([]);
 
         $this->assertEquals(count($vulns), 60);
     }
