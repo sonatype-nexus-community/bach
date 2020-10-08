@@ -21,7 +21,7 @@ class AuditTextTest extends TestCase
         $output = new OutputStyle($string_input, $stream_output);
         $audit = new AuditText();
 
-        $audit->audit_results($response, $output);
+        $audit->auditResults($response, $output);
 
         $this->assertEquals(filesize($tmp_file_name), 4793);
         unlink($tmp_file_name);

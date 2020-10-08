@@ -23,7 +23,7 @@ class IQClientTest extends TestCase
 
         $iq_client = new IQClient($client);
 
-        $internal_id = $iq_client->get_internal_application_id('testapp');
+        $internal_id = $iq_client->getInternalApplicationId('testapp');
 
         $this->assertEquals($internal_id, "4537e6fe68c24dd5ac83efd97d4fc2f4");
     }
@@ -42,7 +42,7 @@ class IQClientTest extends TestCase
 
         $iq_client = new IQClient($client);
 
-        $status_url = $iq_client->submit_sbom('sbom', '4537e6fe68c24dd5ac83efd97d4fc2f4', 'develop');
+        $status_url = $iq_client->submitSbom('sbom', '4537e6fe68c24dd5ac83efd97d4fc2f4', 'develop');
 
         $this->assertEquals($status_url, "api/v2/scan/applications/a20bc16e83944595a94c2e36c1cd228e/status/9cee2b6366fc4d328edc318eae46b2cb");
     }
@@ -65,12 +65,12 @@ class IQClientTest extends TestCase
 
         $iq_client = new IQClient($client);
 
-        $response = $iq_client->poll_status_url("api/v2/scan/applications/a20bc16e83944595a94c2e36c1cd228e/status/9cee2b6366fc4d328edc318eae46b2cb");
+        $response = $iq_client->pollStatusUrl("api/v2/scan/applications/a20bc16e83944595a94c2e36c1cd228e/status/9cee2b6366fc4d328edc318eae46b2cb");
 
         $this->assertEquals($response->policyAction, 'None');
-        $this->assertEquals($response->get_policy_action_text(), 'You have composed a masterpiece, no policy actions necessary, compose away!');
-        $this->assertEquals($response->get_policy_action_warn_type(), 'info');
-        $this->assertEquals($response->get_exit_code(), 0);
+        $this->assertEquals($response->getPolicyActionText(), 'You have composed a masterpiece, no policy actions necessary, compose away!');
+        $this->assertEquals($response->getPolicyActionWarnType(), 'info');
+        $this->assertEquals($response->getExitCode(), 0);
     }
 
     private function join_paths(...$paths) {

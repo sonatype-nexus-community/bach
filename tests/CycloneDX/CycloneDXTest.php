@@ -17,7 +17,7 @@ class CycloneDXTest extends TestCase
         array_push($list_of_coordinates, "pkg:composer/thing/name@0.0.0", "pkg:composer/thing/anothername@1.0.0");
         $coordinates['coordinates'] = $list_of_coordinates;
 
-        $sbom = $cyclonedx->create_and_return_sbom($coordinates);
+        $sbom = $cyclonedx->createAndReturnSbom($coordinates);
 
         $this->assertXmlStringEqualsXmlString($sbom, '<?xml version="1.0" encoding="UTF-8"?><bom version="1" xmlns="http://cyclonedx.org/schema/bom/1.1"><components><component type="library"><group>thing</group><name>name</name><version>0.0.0</version><purl>pkg:composer/thing/name@0.0.0</purl></component><component type="library"><group>thing</group><name>anothername</name><version>1.0.0</version><purl>pkg:composer/thing/anothername@1.0.0</purl></component></components></bom>');
     }
