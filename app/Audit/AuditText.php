@@ -26,7 +26,7 @@ class AuditText implements Audit
                 echo Color::LIGHT_WHITE, $p, Color::RESET, PHP_EOL;
                 echo $d . "\n" . "Scan status: " . count($r['vulnerabilities']) . " vulnerabilities found." . "\n";
                 foreach ($r["vulnerabilities"] as $vuln) {
-                    $this->output_vuln_table($vuln, $output);
+                    $this->outputVulnTable($vuln, $output);
                 }
             }
         }
