@@ -124,8 +124,11 @@ class IQClient
                 if ($code == 200)
                 {
                     $results = \json_decode($response->getBody(), true);
+
+                    $iq_policy_response = new IQPolicyResponse();
+                    foreach($results as $key => $value) $iq_policy_response->{$key} = $value;
                     
-                    return $results;
+                    return $iq_policy_response;
                 }
                 echo '.';
         
