@@ -67,7 +67,7 @@ class IQClientTest extends TestCase
 
         $response = $iq_client->poll_status_url("api/v2/scan/applications/a20bc16e83944595a94c2e36c1cd228e/status/9cee2b6366fc4d328edc318eae46b2cb");
 
-        $this->assertEquals($response['policyAction'], 'None');
+        $this->assertEquals($response->policyAction, 'None');
     }
 
     private function join_paths(...$paths) {
