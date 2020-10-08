@@ -10,7 +10,7 @@ class IQPolicyResponse
     public array $openPolicyViolations;
     public int $grandfatheredPolicyViolations;
 
-    public function getPolicyActionText(): string {
+    public function get_policy_action_text(): string {
         switch ($this->policyAction) {
             case 'Failure':
                 return 'Put down the wand, time to clean up some policy failures before you compose further!';
@@ -24,7 +24,7 @@ class IQPolicyResponse
         }
     }
 
-    public function getPolicyActionWarnType(): string {
+    public function get_policy_action_warn_type(): string {
         switch ($this->policyAction) {
             case 'Failure':
                 return 'error';
@@ -38,7 +38,7 @@ class IQPolicyResponse
         }
     }
 
-    public function getExitCode(): int {
+    public function get_exit_code(): int {
         switch ($this->policyAction) {
             case 'Failure':
                 return 1;

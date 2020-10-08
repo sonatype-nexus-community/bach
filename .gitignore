@@ -4,3 +4,5 @@
 /vendor
 .env
 composer.phar
+.phplint-cache
+/build 

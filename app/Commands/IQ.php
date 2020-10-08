@@ -85,9 +85,9 @@ class IQ extends Command
             return 1;
         }
 
-        $this->{$response->getPolicyActionWarnType()}($response->getPolicyActionText());
-        $this->{$response->getPolicyActionWarnType()}('Report URL: ' . $response->reportHtmlUrl);
-        return $response->getExitCode();
+        $this->{$response->get_policy_action_warn_type()}($response->get_policy_action_text());
+        $this->{$response->get_policy_action_warn_type()}('Report URL: ' . $response->reportHtmlUrl);
+        return $response->get_exit_code();
     }
 
     protected function show_logo()
