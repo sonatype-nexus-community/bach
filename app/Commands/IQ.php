@@ -80,6 +80,10 @@ class IQ extends Command
         $response = $iq_client->poll_status_url($status_url);
 
         echo PHP_EOL;
+        if ($response->isError) {
+            $this->error("There was an error communicating with Nexus IQ Server");
+            return 1;
+        }
 
         $this->{$response->getPolicyActionWarnType()}($response->getPolicyActionText());
         $this->{$response->getPolicyActionWarnType()}('Report URL: ' . $response->reportHtmlUrl);
