@@ -1,4 +1,8 @@
 <p align="center">
+    <img src="https://github.com/sonatype-nexus-community/bach/blob/main/docs/images/Bach@2x.png" width="350"/>
+</p>
+
+<p align="center">
     <a href="https://circleci.com/gh/sonatype-nexus-community/bach"><img src="https://circleci.com/gh/sonatype-nexus-community/bach.svg?style=shield" alt="Circle CI Build Status"></img></a>
 </p>
 
