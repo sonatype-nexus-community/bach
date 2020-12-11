@@ -44,38 +44,38 @@ class Composer extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle() : int
     {
         foreach ($this->styles as $key => $value) {
             $this->output->getFormatter()->setStyle($key, $value);
         }
 
         $this->showLogo();
-        
+
         if (!File::exists($this->argument('file'))) {
             $this->error("The file " . $this->argument('file') . " does not exist");
-            return;
+            return 1;
         }
-    
+
         $file = realpath($this->argument('file'));
 
         $parser = new ComposerParser($file);
 
-        $packages = $parser->get_packages();
+        $packages = $parser->getPackages();
 
-        $coordinates = $parser->get_coordinates($packages);
-        
+        $coordinates = $parser->getCoordinates($packages);
+
         $ossindex = new OSSIndex();
 
         $response = $ossindex->getVulns($coordinates);
 
         if (count($response) == 0) {
-            $this->error("Did not receieve any data from OSS Index API.");
+            $this->error("Did not receive any data from OSS Index API.");
             return 1;
         } else {
             $audit = new AuditText();
 
-            $vulns = $audit->audit_results($response, $this->output);
+            $vulns = $audit->auditResults($response, $this->output);
 
             if ($vulns > 0) {
                 return 1;
