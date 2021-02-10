@@ -37,9 +37,13 @@ class OSSIndex
             $vulnerabilities = array();
 
             foreach($coord_chunks as $chunk) {
+                $chonk = (object)[];
+                $chonk->coordinates = $chunk;
+
                 $response = $this->client->post('v3/component-report', [
-                    RequestOptions::JSON => $coordinates
+                    RequestOptions::JSON => $chonk
                 ]);
+                
                 $code = $response->getStatusCode();
                 if ($code != 200)
                 {
