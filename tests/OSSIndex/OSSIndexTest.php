@@ -23,8 +23,7 @@ class OSSIndexTest extends TestCase
 
         $oss_index = new OSSIndex($client);
 
-        $coordinates = (object)[];
-        $coordinates->coordinates = ['pkg:test/pkga@1.0.0'];
+        $coordinates["coordinates"] = ['pkg:test/pkga@1.0.0'];
 
         $vulns = $oss_index->get_vulns($coordinates);
 
