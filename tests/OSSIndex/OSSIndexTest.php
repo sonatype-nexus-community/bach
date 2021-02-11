@@ -25,7 +25,7 @@ class OSSIndexTest extends TestCase
 
         $coordinates["coordinates"] = ['pkg:test/pkga@1.0.0'];
 
-        $vulns = $oss_index->get_vulns($coordinates);
+        $vulns = $oss_index->getVulns($coordinates);
 
         $this->assertEquals(count($vulns), 60);
     }
