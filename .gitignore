@@ -4,6 +4,8 @@
 /vendor
 .env
 composer.phar
+.phplint-cache
+/build
 
 # ci config for local ci build
 .circleci/local-config.yml

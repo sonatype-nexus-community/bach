@@ -1,5 +1,6 @@
 <?php
 namespace App\Commands;
+
 error_reporting(E_ALL ^ E_DEPRECATED);
 
 use LaravelZero\Framework\Commands\Command;
@@ -8,6 +9,7 @@ use \Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Laminas\Text\Figlet\Figlet;
 use App\Audit\AuditText;
 use App\OSSIndex\OSSIndex;
+use App\CycloneDX\CycloneDX;
 use App\Parse\ComposerParser;
 
 class Composer extends Command
@@ -42,52 +44,48 @@ class Composer extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle() : int
     {
-        foreach($this->styles as $key => $value)
-        {
+        foreach ($this->styles as $key => $value) {
             $this->output->getFormatter()->setStyle($key, $value);
         }
 
-        $this->show_logo();
-        
-        if (!File::exists($this->argument('file')))
-        {
+        $this->showLogo();
+
+        if (!File::exists($this->argument('file'))) {
             $this->error("The file " . $this->argument('file') . " does not exist");
-            return;
+            return 1;
         }
-    
+
         $file = realpath($this->argument('file'));
 
         $parser = new ComposerParser($file);
 
-        $packages = $parser->get_packages();
+        $packages = $parser->getPackages();
 
-        $coordinates = $parser->get_coordinates($packages);
-        
+        $coordinates = $parser->getCoordinates($packages);
+
         $ossindex = new OSSIndex();
 
-        $response = $ossindex->get_vulns($coordinates);
+        $response = $ossindex->getVulns($coordinates);
 
-        if(count($response) == 0) {
-            $this->error("Did not receieve any data from OSS Index API.");
+        if (count($response) == 0) {
+            $this->error("Did not receive any data from OSS Index API.");
             return 1;
-        }
-        else {
+        } else {
             $audit = new AuditText();
 
-            $vulns = $audit->audit_results($response, $this->output);
+            $vulns = $audit->auditResults($response, $this->output);
 
             if ($vulns > 0) {
                 return 1;
-            }
-            else {
+            } else {
                 return 0;
             }
         }
     }
 
-    protected function show_logo()
+    protected function showLogo()
     {
         $figlet = new Figlet();
         $figlet->setFont(dirname(__FILE__) . '/larry3d.flf');

@@ -15,6 +15,7 @@ jobs:
           paths:
             - vendor
       - run: ./vendor/bin/phpunit tests --log-junit tests/_output/test_results.xml
+      - run: ./vendor/bin/phpcs -n --standard=PSR2 ./app/ 
       - store_test_results:
           path: tests/_output
       - store_artifacts:
