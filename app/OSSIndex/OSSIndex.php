@@ -32,23 +32,35 @@ class OSSIndex
 
     public function getVulns($coordinates)
     {
-        try {
-            $response = $this->client->post(
-                'v3/component-report',
-                [
-                RequestOptions::JSON => $coordinates
-                ]
-            );
-            $code = $response->getStatusCode();
-            if ($code != 200) {
-                echo "HTTP request did not return 200 OK: " . $code . ".";
-                return;
-            } else {
-                $vulnerabilities = \json_decode($response->getBody(), true);
-                
-                return $vulnerabilities;
+        try
+        {
+            $coord_chunks = array_chunk($coordinates["coordinates"], 128);
+            $vulnerabilities = array();
+
+            foreach($coord_chunks as $chunk) {
+                $chonk = (object)[];
+                $chonk->coordinates = $chunk;
+
+                $response = $this->client->post('v3/component-report', [
+                    RequestOptions::JSON => $chonk
+                ]);
+
+                $code = $response->getStatusCode();
+                if ($code != 200)
+                {
+                    echo "HTTP request did not return 200 OK: " . $code . ".";
+                    return;
+                }
+                else
+                {
+                    $vulnerabilities = array_merge($vulnerabilities, \json_decode($response->getBody(), true));
+                }
             }
-        } catch (Exception $e) {
+
+            return $vulnerabilities;
+        }
+        catch (Exception $e)
+        {
             echo "Exception thrown making HTTP request: " . $e->getMessage() . ".";
             return [];
         }

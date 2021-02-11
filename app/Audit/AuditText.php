@@ -124,11 +124,11 @@ class AuditText implements Audit
         $float_score = (float) $score;
         switch (true) {
             case ($float_score >= 9):
-                echo "\t", Color::LIGHT_RED, $text, Color::RESET, PHP_EOL;
-                break;
+                echo "\t", Color::RED, $text, Color::RESET, PHP_EOL;
+            break;
             case ($float_score >= 7 && $float_score < 9):
-                echo "\t", Color::LIGHT_ORANGE, $text, Color::RESET, PHP_EOL;
-                break;
+                echo "\t", Color::LIGHT_RED, $text, Color::RESET, PHP_EOL;
+            break;
             case ($float_score >= 4 && $float_score < 7):
                 echo "\t", Color::LIGHT_YELLOW, $text, Color::RESET, PHP_EOL;
                 break;
