@@ -1,0 +1,26 @@
+{
+    "name": "bach/e2e-sample",
+    "description": "Project with known vulnerable dependencies",
+    "homepage": "https://github.com/OSSIndex/bach",
+    "type": "project",
+    "license": "Apache-2.0",
+    "support": {
+        "issues": "https://github.com/OSSIndex/bach/issues",
+        "source": "https://github.com/OSSIndex/bach"
+    },
+    "require": {
+        "php": ">=5.3.10",
+        "twig/twig": "1.35.0",
+        "ircmaxell/password-compat": "1.*",
+        "leafo/lessphp": "0.5.0",
+        "paragonie/random_compat": "~1.4",
+        "paragonie/sodium_compat": "~1.6",
+        "phpmailer/phpmailer": "5.2.20",
+        "google/recaptcha": "^1.1",
+        "guzzlehttp/guzzle": "4.1.4"
+    },
+    "require-dev": {
+        "mockery/mockery": "^1.0",
+        "phpunit/phpunit": "^7.5"
+    }
+}
