@@ -15,7 +15,7 @@ The local build runs in a docker container.
 
     Typically, you run both commands together:
     
-        circleci config process .circleci/config.yml > .circleci/local-config.yml && circleci local execute -c .circleci/local-config.yml --job 'build_and_test'
+        circleci config process .circleci/config.yml > .circleci/local-config.yml && circleci local execute -c .circleci/local-config.yml --job 'build_and_test-1'
     
     With the above command, operations that cannot occur during a local build will show an error like this:
      
