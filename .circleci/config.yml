@@ -1,21 +1,33 @@
-version: 2
-jobs:
-  build_and_test:
+version: 2.1
+executors:
+  php_7_4:
     docker:
       - image: circleci/php:7.4
+  php_8_0:
+    docker:
+      - image: circleci/php:8.0
+
+jobs:
+  build_and_test:
+    parameters:
+      e:
+        type: executor
+        default: php_8_0
+    executor: << parameters.e >>
     steps:
       - checkout
       - restore_cache:
           keys:
           - composer-v1-{{ checksum "composer.lock" }}
           - composer-v1-
+      - run: composer update
       - run: composer install -n --prefer-dist
       - save_cache:
           key: composer-v1-{{ checksum "composer.lock" }}
           paths:
             - vendor
       - run: ./vendor/bin/phpunit tests --log-junit tests/_output/test_results.xml
-      - run: ./vendor/bin/phpcs -n --standard=PSR2 ./app/ 
+      - run: ./vendor/bin/phpcs -n --standard=PSR2 ./app/
       - store_test_results:
           path: tests/_output
       - store_artifacts:
@@ -25,4 +37,7 @@ workflows:
   version: 2
   workflow:
     jobs:
-    - build_and_test
+    - build_and_test:
+        e: php_8_0
+    - build_and_test:
+        e: php_7_4
