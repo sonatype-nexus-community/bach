@@ -28,6 +28,10 @@ jobs:
             - vendor
       - run: ./vendor/bin/phpunit tests --log-junit tests/_output/test_results.xml
       - run: ./vendor/bin/phpcs -n --standard=PSR2 ./app/
+      - run:
+          description: "Run bach on bach"
+          command: |
+            php bach composer composer.json
       - store_test_results:
           path: tests/_output
       - store_artifacts:
@@ -41,3 +45,16 @@ workflows:
         e: php_8_0
     - build_and_test:
         e: php_7_4
+
+  build_nightly:
+    triggers:
+      - schedule:
+          cron: "35 20 * * *"
+          filters:
+            branches:
+              only: main
+    jobs:
+      - build_and_test:
+          e: php_8_0
+      - build_and_test:
+          e: php_7_4
