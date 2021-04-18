@@ -16,6 +16,8 @@ jobs:
     executor: << parameters.e >>
     steps:
       - checkout
+      - run: composer validate
+      - run: composer check-platform-reqs
       - restore_cache:
           keys:
           - composer-v1-{{ checksum "composer.lock" }}
