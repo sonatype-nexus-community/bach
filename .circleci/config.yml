@@ -13,19 +13,29 @@ jobs:
       e:
         type: executor
         default: php_8_0
+      cv:
+        description: "composer's version"
+        type: integer
+        default: 2
     executor: << parameters.e >>
     steps:
       - checkout
+      - run:
+          description: "Setup composer v<< parameters.cv >>"
+          command: >
+            sudo composer self-update
+            --no-progress
+            --clean-backups --<< parameters.cv >>
       - run: composer validate
       - run: composer check-platform-reqs
       - restore_cache:
           keys:
-          - composer-v1-{{ checksum "composer.lock" }}
-          - composer-v1-
+          - composer<< parameters.cv >>-{{ checksum "composer.lock" }}
+          - composer<< parameters.cv >>-
       - run: composer update
       - run: composer install -n --prefer-dist
       - save_cache:
-          key: composer-v1-{{ checksum "composer.lock" }}
+          key: composer<< parameters.cv >>-{{ checksum "composer.lock" }}
           paths:
             - vendor
       - run: ./vendor/bin/phpunit tests --log-junit tests/_output/test_results.xml
@@ -47,6 +57,7 @@ workflows:
         e: php_8_0
     - build_and_test:
         e: php_7_4
+        cv: 1
 
   build_nightly:
     triggers:
@@ -60,3 +71,4 @@ workflows:
           e: php_8_0
       - build_and_test:
           e: php_7_4
+          cv: 1
