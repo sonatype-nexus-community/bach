@@ -7,12 +7,5 @@ composer.phar
 .phplint-cache
 /build
 
-# Built phars
-*.phar
-build/*.phar
-
 # ci config for local ci build
 .circleci/local-config.yml
-
-# PHPUnit caches
-.phpunit.result.cache
