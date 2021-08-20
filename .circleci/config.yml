@@ -28,9 +28,9 @@ jobs:
             --clean-backups --<< parameters.cv >>
       - restore_cache:
           keys:
-          - composer<< parameters.cv >>-{{ checksum "composer.lock" }}
-          - composer<< parameters.cv >>-
-      - run: composer update
+            - composer<< parameters.cv >>-{{ checksum "composer.lock" }}
+            - composer<< parameters.cv >>-
+      - run: COMPOSER_MEMORY_LIMIT=-1 composer update
       - run: composer install -n --prefer-dist
       - save_cache:
           key: composer<< parameters.cv >>-{{ checksum "composer.lock" }}
@@ -51,11 +51,11 @@ workflows:
   version: 2
   workflow:
     jobs:
-    - build_and_test:
-        e: php_8_0
-    - build_and_test:
-        e: php_7_4
-        cv: 1
+      - build_and_test:
+          e: php_8_0
+      - build_and_test:
+          e: php_7_4
+          cv: 1
 
   build_nightly:
     triggers:
