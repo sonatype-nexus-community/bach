@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Commands;
 
 error_reporting(E_ALL ^ E_DEPRECATED);
@@ -52,23 +53,23 @@ class IQ extends Command
         }
 
         $this->showLogo();
-        
+
         if (!File::exists($this->option('file'))) {
             $this->error("The file " . $this->option('file') . " does not exist");
             return;
         }
-    
+
         $file = realpath($this->option('file'));
 
         $parser = new ComposerParser($file);
 
-        $packages = $parser->get_packages();
+        $packages = $parser->getPackages();
 
-        $coordinates = $parser->get_coordinates($packages);
+        $coordinates = $parser->getCoordinates($packages);
 
         $cyclonedx = new CycloneDX();
 
-        $sbom = $cyclonedx->create_and_return_sbom($coordinates);
+        $sbom = $cyclonedx->createAndReturnSbom($coordinates);
 
         $iq_client = new IQClient(
             null,
