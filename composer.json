@@ -6,8 +6,8 @@
     "type": "project",
     "license": "Apache-2.0",
     "support": {
-        "issues": "https://github.com/onatype-nexus-community/bach/issues",
-        "source": "https://github.com/onatype-nexus-community/bach"
+        "issues": "https://github.com/sonatype-nexus-community/bach/issues",
+        "source": "https://github.com/sonatype-nexus-community/bach"
     },
     "require": {
         "php": "^7.1.3 || ^8.0",
