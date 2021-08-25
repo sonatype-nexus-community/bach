@@ -41,6 +41,9 @@ jobs:
           paths:
             - vendor
       - run:
+          name: "Validate PHP Platform Requirements"
+          command: "composer check-platform-reqs"
+      - run:
           name: "Run Unit Tests"
           command: ./vendor/bin/phpunit tests --log-junit tests/_output/test_results.xml
       - run:
