@@ -24,6 +24,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Inspect composer"
+          command: |
+            composer --help
+            composer self-udpate --help
+      - run:
           name: "Setup composer v<< parameters.cv >>"
           command: >
             sudo composer self-update
