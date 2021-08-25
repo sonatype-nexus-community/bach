@@ -68,7 +68,6 @@ workflows:
           cv: 1
       - build_and_test:
           e: php_7_1
-          cv: 1
 
   build_nightly:
     triggers:
