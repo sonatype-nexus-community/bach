@@ -17,9 +17,9 @@ jobs:
         type: executor
         default: php_8_0
       cv:
-        description: "composer's version"
-        type: integer
-        default: 2
+        description: "Flag to direct which version of Composer to use"
+        type: string
+        default: "--2"
     executor: << parameters.e >>
     steps:
       - checkout
@@ -29,11 +29,11 @@ jobs:
             composer --help
             composer self-update --help
       - run:
-          name: "Setup composer v<< parameters.cv >>"
+          name: "Setup composer"
           command: >
             sudo composer self-update
             --no-progress
-            --clean-backups --<< parameters.cv >>
+            --clean-backups << parameters.cv >>
       - restore_cache:
           keys:
             - composer<< parameters.cv >>-{{ checksum "composer.lock" }}
@@ -70,9 +70,10 @@ workflows:
           e: php_8_0
       - build_and_test:
           e: php_7_4
-          cv: 1
+          cv: "--1"
       - build_and_test:
           e: php_7_1
+          cv: ""
 
   build_nightly:
     triggers:
@@ -86,6 +87,7 @@ workflows:
           e: php_8_0
       - build_and_test:
           e: php_7_4
-          cv: 1
+          cv: "--1"
       - build_and_test:
           e: php_7_1
+          cv: ""
