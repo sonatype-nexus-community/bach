@@ -27,7 +27,7 @@ jobs:
           name: "Inspect composer"
           command: |
             composer --help
-            composer self-udpate --help
+            composer self-update --help
       - run:
           name: "Setup composer v<< parameters.cv >>"
           command: >
