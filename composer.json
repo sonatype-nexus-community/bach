@@ -1,6 +1,5 @@
 {
     "name": "sonatype-nexus-community/bach",
-    "version": "1.0.0-dev",
     "description": "Dependency vulnerability auditor for PHP",
     "homepage": "https://github.com/sonatype-nexus-community/bach",
     "type": "project",
