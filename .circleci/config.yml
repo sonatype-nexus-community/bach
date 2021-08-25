@@ -1,5 +1,8 @@
 version: 2.1
 executors:
+  php_7_1:
+    docker:
+      - image: circleci/php:7.1
   php_7_4:
     docker:
       - image: circleci/php:7.4
@@ -21,7 +24,7 @@ jobs:
     steps:
       - checkout
       - run:
-          description: "Setup composer v<< parameters.cv >>"
+          name: "Setup composer v<< parameters.cv >>"
           command: >
             sudo composer self-update
             --no-progress
@@ -30,18 +33,25 @@ jobs:
           keys:
             - composer<< parameters.cv >>-{{ checksum "composer.lock" }}
             - composer<< parameters.cv >>-
-      - run: COMPOSER_MEMORY_LIMIT=-1 composer update
-      - run: composer install -n --prefer-dist
+      - run:
+          name: "Update Composer"
+          command: COMPOSER_MEMORY_LIMIT=-1 composer update
+      - run:
+          name: "Composer install"
+          command: composer install -n --prefer-dist
       - save_cache:
           key: composer<< parameters.cv >>-{{ checksum "composer.lock" }}
           paths:
             - vendor
-      - run: ./vendor/bin/phpunit tests --log-junit tests/_output/test_results.xml
-      - run: ./vendor/bin/phpcs -n --standard=PSR2 ./app/
       - run:
-          description: "Run bach on bach"
-          command: |
-            php bach composer composer.json
+          name: "Run Unit Tests"
+          command: ./vendor/bin/phpunit tests --log-junit tests/_output/test_results.xml
+      - run:
+          name: "Run PHPCS (coding standards)"
+          command: ./vendor/bin/phpcs -n --standard=PSR2 ./app/
+      - run:
+          name: "Run bach on bach"
+          command: php bach composer composer.json
       - store_test_results:
           path: tests/_output
       - store_artifacts:
@@ -56,6 +66,9 @@ workflows:
       - build_and_test:
           e: php_7_4
           cv: 1
+      - build_and_test:
+          e: php_7_1
+          cv: 1
 
   build_nightly:
     triggers:
@@ -69,4 +82,7 @@ workflows:
           e: php_8_0
       - build_and_test:
           e: php_7_4
+          cv: 1
+      - build_and_test:
+          e: php_7_1
           cv: 1
