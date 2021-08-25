@@ -1,8 +1,5 @@
 version: 2.1
 executors:
-  php_7_1:
-    docker:
-      - image: circleci/php:7.1
   php_7_4:
     docker:
       - image: circleci/php:7.4
@@ -17,23 +14,18 @@ jobs:
         type: executor
         default: php_8_0
       cv:
-        description: "Flag to direct which version of Composer to use"
-        type: string
-        default: "--2"
+        description: "composer's version"
+        type: integer
+        default: 2
     executor: << parameters.e >>
     steps:
       - checkout
       - run:
-          name: "Inspect composer"
-          command: |
-            composer --help
-            composer self-update --help
-      - run:
-          name: "Setup composer"
+          name: "Setup composer v<< parameters.cv >>"
           command: >
             sudo composer self-update
             --no-progress
-            --clean-backups << parameters.cv >>
+            --clean-backups --<< parameters.cv >>
       - restore_cache:
           keys:
             - composer<< parameters.cv >>-{{ checksum "composer.lock" }}
@@ -70,10 +62,7 @@ workflows:
           e: php_8_0
       - build_and_test:
           e: php_7_4
-          cv: "--1"
-      - build_and_test:
-          e: php_7_1
-          cv: ""
+          cv: 1
 
   build_nightly:
     triggers:
@@ -87,7 +76,4 @@ workflows:
           e: php_8_0
       - build_and_test:
           e: php_7_4
-          cv: "--1"
-      - build_and_test:
-          e: php_7_1
-          cv: ""
+          cv: 1
