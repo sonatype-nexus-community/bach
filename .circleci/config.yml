@@ -31,9 +31,6 @@ jobs:
             - composer<< parameters.cv >>-{{ checksum "composer.lock" }}
             - composer<< parameters.cv >>-
       - run:
-          name: "Update Composer"
-          command: COMPOSER_MEMORY_LIMIT=-1 composer update
-      - run:
           name: "Composer install"
           command: composer install -n --prefer-dist
       - save_cache:
