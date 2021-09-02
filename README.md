@@ -2,9 +2,14 @@
     <img src="https://github.com/sonatype-nexus-community/bach/blob/main/docs/images/Bach@2x.png" width="350"/>
 </p>
 
-<p align="center">
-    <a href="https://circleci.com/gh/sonatype-nexus-community/bach"><img src="https://circleci.com/gh/sonatype-nexus-community/bach.svg?style=shield" alt="Circle CI Build Status"></img></a>
-</p>
+![PHP Version Support](https://img.shields.io/badge/php-^7.4.0|^8.0.0-blue)
+![CircleCI](https://img.shields.io/circleci/build/github/sonatype-nexus-community/bach)
+[![GitHub license](https://img.shields.io/github/license/sonatype-nexus-community/bach)](https://github.com/sonatype-nexus-community/bach/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/sonatype-nexus-community/bach)](https://github.com/sonatype-nexus-community/bach/issues)
+[![GitHub forks](https://img.shields.io/github/forks/sonatype-nexus-community/bach)](https://github.com/sonatype-nexus-community/bach/network)
+[![GitHub stars](https://img.shields.io/github/stars/sonatype-nexus-community/bach)](https://github.com/sonatype-nexus-community/bach/stargazers)
+
+---- 
 
 # Bach
 
@@ -137,3 +142,24 @@ ensure the new dependency was installed and available to unit tests, etc:
   composer install
   vendor/bin/phpunit tests
   ``` 
+
+## Releasing bach
+
+Releasing is conducted by simply tagging the repository from the `main` branch as per guidlines on [packagist.org](https://packagist.org/about#naming-your-package).
+
+We follow standard semantic versioning.
+
+A GitHub Hook is fired which will cause packagist.org to re-index this Git repository and discover new version/release tags.
+
+## The Fine Print
+
+Remember:
+
+It is worth noting that this is **NOT SUPPORTED** by Sonatype, and is a contribution of ours to the open source
+community (read: you!)
+
+* Use this contribution at the risk tolerance that you have
+* Do NOT file Sonatype support tickets related to `bach` support in regard to this project
+* DO file issues here on GitHub, so that the community can pitch in
+
+Phew, that was easier than I thought. Last but not least of all - have fun!
