@@ -3,7 +3,7 @@
 </p>
 
 ![PHP Version Support](https://img.shields.io/badge/php-^7.4.0|^8.0.0-blue)
-![CircleCI](https://img.shields.io/circleci/build/github/sonatype-nexus-community/bach)
+[![sonatype-nexus-community](https://circleci.com/gh/sonatype-nexus-community/bach.svg?style=shield)](https://circleci.com/gh/sonatype-nexus-community/bach)
 [![GitHub license](https://img.shields.io/github/license/sonatype-nexus-community/bach)](https://github.com/sonatype-nexus-community/bach/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/sonatype-nexus-community/bach)](https://github.com/sonatype-nexus-community/bach/issues)
 [![GitHub forks](https://img.shields.io/github/forks/sonatype-nexus-community/bach)](https://github.com/sonatype-nexus-community/bach/network)
