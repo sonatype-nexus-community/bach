@@ -18,6 +18,8 @@ jobs:
         type: integer
         default: 2
     executor: << parameters.e >>
+    environment:
+      COMPOSER_MEMORY_LIMIT: -1
     steps:
       - checkout
       - run:
