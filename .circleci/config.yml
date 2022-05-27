@@ -69,8 +69,6 @@ workflows:
     jobs:
       - build_and_test:
           e: php_8_0
-          context:
-            - slack_community_oss_fun
           filters:
             branches:
               # Forked pull requests have CIRCLE_BRANCH set to pull/XXX
@@ -78,14 +76,12 @@ workflows:
       - build_and_test:
           e: php_7_4
           cv: 1
-          context:
-            - slack_community_oss_fun
           filters:
             branches:
               # Forked pull requests have CIRCLE_BRANCH set to pull/XXX
               only: /pull\/[0-9]+/
 
-  build_main:
+  build_origin:
     jobs:
       - build_and_test:
           e: php_8_0
