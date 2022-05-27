@@ -23,6 +23,7 @@ jobs:
         default: 2
     executor: << parameters.e >>
     environment:
+      # fixes memory error when using composer v1 to run composer update
       COMPOSER_MEMORY_LIMIT: -1
     steps:
       - checkout
