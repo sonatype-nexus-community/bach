@@ -31,6 +31,9 @@ jobs:
             - composer<< parameters.cv >>-{{ checksum "composer.lock" }}
             - composer<< parameters.cv >>-
       - run:
+          name: "Composer update"
+          command: composer update
+      - run:
           name: "Composer install"
           command: composer install -n --prefer-dist
       - save_cache:
