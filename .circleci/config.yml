@@ -1,4 +1,8 @@
 version: 2.1
+
+orbs:
+  slack: circleci/slack@4.4.4
+
 executors:
   php_7_4:
     docker:
@@ -18,6 +22,9 @@ jobs:
         type: integer
         default: 2
     executor: << parameters.e >>
+    environment:
+      # fixes memory error when using composer v1 to run composer update
+      COMPOSER_MEMORY_LIMIT: -1
     steps:
       - checkout
       - run:
@@ -30,6 +37,9 @@ jobs:
           keys:
             - composer<< parameters.cv >>-{{ checksum "composer.lock" }}
             - composer<< parameters.cv >>-
+      - run:
+          name: "Composer update"
+          command: composer update
       - run:
           name: "Composer install"
           command: composer install -n --prefer-dist
@@ -56,13 +66,41 @@ jobs:
 
 workflows:
   version: 2
-  workflow:
+  build_fork:
     jobs:
       - build_and_test:
           e: php_8_0
+          filters:
+            branches:
+              # Forked pull requests have CIRCLE_BRANCH set to pull/XXX
+              only: /pull\/[0-9]+/
       - build_and_test:
           e: php_7_4
           cv: 1
+          filters:
+            branches:
+              # Forked pull requests have CIRCLE_BRANCH set to pull/XXX
+              only: /pull\/[0-9]+/
+
+  build_origin:
+    jobs:
+      - build_and_test:
+          e: php_8_0
+          context:
+            - slack_community_oss_fun
+          filters:
+            branches:
+              # Forked pull requests have CIRCLE_BRANCH set to pull/XXX
+              ignore: /pull\/[0-9]+/
+      - build_and_test:
+          e: php_7_4
+          cv: 1
+          context:
+            - slack_community_oss_fun
+          filters:
+            branches:
+              # Forked pull requests have CIRCLE_BRANCH set to pull/XXX
+              ignore: /pull\/[0-9]+/
 
   build_nightly:
     triggers:
@@ -74,6 +112,10 @@ workflows:
     jobs:
       - build_and_test:
           e: php_8_0
+          context:
+            - slack_community_oss_fun
       - build_and_test:
           e: php_7_4
           cv: 1
+          context:
+            - slack_community_oss_fun
