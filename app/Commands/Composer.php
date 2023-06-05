@@ -65,7 +65,9 @@ class Composer extends Command
 
         $coordinates = $parser->getCoordinates($packages);
 
-        $ossindex = new OSSIndex();
+        // Bit odd but a way of getting the package version and sending it to the class without
+        // it knowing too much about Laravel-Zero
+        $ossindex = new OSSIndex(null, config('app.version'));
 
         $response = $ossindex->getVulns($coordinates);
 

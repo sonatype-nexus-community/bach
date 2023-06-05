@@ -17,12 +17,16 @@ class OSSIndex
      * @param Client|null $client
      */
     public function __construct(
-        $client = null
+        $client = null,
+        $version = "not-set"
     ) {
         if ($client == null) {
             $this->client = new Client(
                 ['base_uri' => 'https://ossindex.sonatype.org/api/',
                 'timeout' => 100.0,
+                'headers' => [
+                    'User-Agent' => "bach-client/{$version}"
+                    ],
                 ]
             );
         } else {
