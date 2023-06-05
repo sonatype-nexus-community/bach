@@ -48,8 +48,6 @@ class OSSIndex
                     RequestOptions::JSON => $chonk
                 ]);
 
-                var_dump($this->client);
-
                 $code = $response->getStatusCode();
                 if ($code != 200) {
                     echo "HTTP request did not return 200 OK: " . $code . ".";
